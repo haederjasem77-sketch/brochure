@@ -29,13 +29,13 @@
             display: flex;
             justify-content: center;
             align-items: center;
+            padding: 10px;
         }
 
         #book {
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
         }
 
-        /* إلغاء أي حوافي أو إطارات بيضاء نهائياً */
         .my-page {
             background-color: #0f172a;
             width: 100%;
@@ -64,20 +64,20 @@
         </div>
     </div>
 
-    <!-- محرك تقليب الصفحات المخصص للموبايل واللمس -->
     <script src="https://cdn.jsdelivr.net/npm/page-flip@2.0.7/dist/js/page-flip.browser.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const pageFlip = new St.PageFlip(document.getElementById('book'), {
-                width: 380,
-                height: 580,
+                width: 400,
+                height: 600,
                 size: "stretch",
-                minWidth: 260,
-                maxWidth: 450,
-                minHeight: 400,
-                maxHeight: 700,
+                minWidth: 280,
+                maxWidth: 480,
+                minHeight: 420,
+                maxHeight: 720,
                 maxShadowOpacity: 0.8,
-                showCover: false,
+                showCover: false,      /* إلغاء وضعية الغلاف */
+                usePortrait: true,    /* إجبار النظام على عرض صفحة واحدة منفردة دائماً */
                 mobileScrollSupport: false
             });
 
