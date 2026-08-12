@@ -37,7 +37,6 @@
             left: 0;
         }
 
-        /* عكس حاوية الكتاب أفقياً لتفعيل انثناء الورق الـ 3D من اليسار */
         #book {
             width: 100% !important;
             height: 100% !important;
@@ -51,7 +50,6 @@
             overflow: hidden;
         }
 
-        /* إعادة تعديل الصورة لكي لا تظهر معكوسة */
         .page img {
             width: 100% !important;
             height: 100% !important;
@@ -66,7 +64,6 @@
 
     <div class="container">
         <div id="book">
-            <!-- الترتيب التسلسلي الطبيعي -->
             <div class="page"><img src="1.jpg" alt="1"></div>
             <div class="page"><img src="2.jpg" alt="2"></div>
             <div class="page"><img src="3.jpg" alt="3"></div>
@@ -76,7 +73,6 @@
         </div>
     </div>
 
-    <!-- محرك انثناء الورق 3D -->
     <script src="https://cdn.jsdelivr.net/npm/page-flip@2.0.7/dist/js/page-flip.browser.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
@@ -96,7 +92,7 @@
                 startPage: 0,
                 mobileScrollSupport: false,
                 flippingTime: 700,
-                useMouseEvents: true,
+                useMouseEvents: false, /* تم الإيقاف لمنع اللمس العكسي للحواف */
                 clickEventForward: false
             });
 
@@ -117,12 +113,13 @@
                 let diffX = endX - startX;
                 let diffY = endY - startY;
 
-                if (Math.abs(diffX) > 30 && Math.abs(diffX) > Math.abs(diffY)) {
+                // التحقق من أن الحركة أفقية ومقصودة وبمسافة واضحة
+                if (Math.abs(diffX) > 40 && Math.abs(diffX) > Math.abs(diffY)) {
                     if (diffX > 0) {
-                        // سحب من اليسار لليمين -> تقليب مرن للورقة التالية بخصائص الـ 3D الكاملة
+                        // سحب طبيعي من اليسار إلى اليمين -> يقلب للأمام (انثناء ورقي 3D كامل)
                         pageFlip.flipNext('top-right');
                     } else {
-                        // سحب من اليمين للربط بالصفحة السابقة
+                        // سحب طبيعي من اليمين إلى اليسار -> يرجع للخلف
                         pageFlip.flipPrev('top-left');
                     }
                 }
