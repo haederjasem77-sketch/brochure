@@ -73,7 +73,7 @@
         </div>
     </div>
 
-    <!-- محرك انثناء الورق 3D الفيزيائي -->
+    <!-- محرك انثناء الورق 3D المرن -->
     <script src="https://cdn.jsdelivr.net/npm/page-flip@2.0.7/dist/js/page-flip.browser.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
@@ -87,15 +87,16 @@
                 maxWidth: 2500,
                 minHeight: 300,
                 maxHeight: 2500,
-                maxShadowOpacity: 0.5,
-                showCover: false,
+                maxShadowOpacity: 0.85, /* ظلال مكثفة لإبراز قوس وتعرج الورقة أثناء الطي */
+                showCover: false,      /* إلغاء أي غلاف صلب */
                 usePortrait: true,
-                startPage: 5, /* يبدأ بالصفحة رقم 1 */
+                startPage: 5,         /* البدء بالصفحة رقم 1 */
                 mobileScrollSupport: false,
-                flippingTime: 600,
-                useMouseEvents: true, /* تفعيل السحب والطي باللمس المباشر */
+                flippingTime: 800,     /* زمن انثناء مرن لإظهار حركة انحناء الورقة */
+                useMouseEvents: true,
+                showPageCorners: true, /* إظهار زاوية الورقة وهي تنثني وتلتف مع اللمس */
                 clickEventForward: false,
-                swipeDistance: 20
+                swipeDistance: 15
             });
 
             const pages = document.querySelectorAll('.my-page');
