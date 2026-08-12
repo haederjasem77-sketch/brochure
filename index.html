@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>البروشور التفاعلي</title>
+    <!-- تحميل المكتبة في الهيد لضمان جاهزيتها تماماً قبل تشغيل الكود -->
+    <script src="https://unpkg.com/page-flip@2.0.7/build/js/page-flip.browser.js"></script>
     <style>
         * {
             box-sizing: border-box;
@@ -82,7 +84,6 @@
 
     <div class="container">
         <div id="book" class="flip-book">
-            <!-- ضَع صفحات البروشور هنا بالترتيب -->
             <div class="page"><img src="1.jpg" alt="غلاف البروشور"></div>
             <div class="page"><img src="2.jpg" alt="صفحة 2"></div>
             <div class="page"><img src="3.jpg" alt="صفحة 3"></div>
@@ -98,31 +99,32 @@
         <button class="btn" id="next-btn">التالية</button>
     </div>
 
-    <!-- مكتبة التقليب التفاعلية -->
-    <script src="https://cdn.jsdelivr.net/npm/page-flip@2.0.7/build/js/page-flip.browser.js"></script>
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
+        window.addEventListener('load', function() {
+            if (typeof St === 'undefined') {
+                alert('عذراً، تعذر تحميل مكتبة تقليب الصفحات. يرجى التأكد من الاتصال بالإنترنت وإعادة تحديث الصفحة.');
+                return;
+            }
+
             const pageFlip = new St.PageFlip(
                 document.getElementById('book'),
                 {
-                    width: 400,        // عرض الصفحة الواحدة
-                    height: 600,       // ارتفاع الصفحة الواحدة
+                    width: 400,
+                    height: 600,
                     size: 'stretch',
                     minWidth: 280,
                     maxWidth: 500,
                     minHeight: 400,
                     maxHeight: 750,
-                    maxShadowOpacity: 0.5, // ظل التقليب الـ 3D
-                    showCover: true,       // جعل الصفحة الأولى خيرة كغلاف
+                    maxShadowOpacity: 0.5,
+                    showCover: true,
                     mobileScrollSupport: false
                 }
             );
 
-            // تحميل الصفحات
             pageFlip.loadFromHTML(document.querySelectorAll('.page'));
             document.getElementById('book').style.display = 'block';
 
-            // أزرار التحكم
             document.getElementById('next-btn').addEventListener('click', () => {
                 pageFlip.flipNext();
             });
@@ -131,7 +133,6 @@
                 pageFlip.flipPrev();
             });
 
-            // تحديث رقم الصفحة عند التقليب
             pageFlip.on('flip', (e) => {
                 document.getElementById('page-info').innerText = `صفحة ${e.data + 1}`;
             });
