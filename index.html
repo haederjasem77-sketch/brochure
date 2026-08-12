@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>البروشور التفاعلي العربي</title>
+    <title>البروشور التفاعلي</title>
     <style>
         * {
             box-sizing: border-box;
@@ -11,27 +11,21 @@
             padding: 0;
         }
 
-        body {
+        html, body {
+            width: 100%;
+            height: 100%;
             background-color: #0f172a;
-            height: 100vh;
-            height: 100dvh;
-            width: 100vw;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            align-items: center;
             overflow: hidden;
-            font-family: system-ui, -apple-system, sans-serif;
             touch-action: none;
             user-select: none;
-            padding: 8px 0;
+            -webkit-user-select: none;
         }
 
-        /* توسيع الحاوية لتملأ الشاشة بالكامل */
+        /* الحاوية تغطي كامل مساحة الشاشة بالظبط */
         .container {
             width: 100vw;
-            height: 88vh;
-            height: 88dvh;
+            height: 100vh;
+            height: 100dvh;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -49,42 +43,13 @@
             overflow: hidden;
         }
 
-        /* تجعل الصورة تغطي كامل مساحة الشاشة بدون أي حواف */
+        /* object-fit: contain تضمن عرض الصورة كاملة 100% دون اقتطاع أي حافة */
         .my-page img {
             width: 100%;
             height: 100%;
-            object-fit: cover;
+            object-fit: contain;
             display: block;
             pointer-events: none;
-        }
-
-        .controls {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding-bottom: 4px;
-        }
-
-        .btn {
-            background: #2563eb;
-            color: #ffffff;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-size: 13px;
-            font-weight: bold;
-            cursor: pointer;
-            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4);
-        }
-
-        .btn:active {
-            background: #1d4ed8;
-        }
-
-        .page-num {
-            color: #94a3b8;
-            font-size: 13px;
-            font-weight: 600;
         }
     </style>
 </head>
@@ -101,23 +66,18 @@
         </div>
     </div>
 
-    <div class="controls">
-        <button class="btn" id="next-btn">الصفحة التالية 👈</button>
-        <span class="page-num" id="page-counter">صفحة 1 / 6</span>
-        <button class="btn" id="prev-btn">👉 السابقة</button>
-    </div>
-
+    <!-- محرك انثناء الورق الـ 3D باللمس -->
     <script src="https://cdn.jsdelivr.net/npm/page-flip@2.0.7/dist/js/page-flip.browser.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const pageFlip = new St.PageFlip(document.getElementById('book'), {
-                width: 450,
-                height: 750,
+                width: window.innerWidth,
+                height: window.innerHeight,
                 size: "stretch",
-                minWidth: 300,
-                maxWidth: 600,
-                minHeight: 500,
-                maxHeight: 1000,
+                minWidth: 200,
+                maxWidth: 2000,
+                minHeight: 300,
+                maxHeight: 3000,
                 maxShadowOpacity: 0.6,
                 showCover: false,
                 usePortrait: true,
@@ -127,29 +87,7 @@
             });
 
             const pages = document.querySelectorAll('.my-page');
-            const totalPages = pages.length;
             pageFlip.loadFromHTML(pages);
-
-            const pageCounter = document.getElementById('page-counter');
-            const nextBtn = document.getElementById('next-btn');
-            const prevBtn = document.getElementById('prev-btn');
-
-            function updateCounter(pageIndex) {
-                const currentRealPage = totalPages - pageIndex;
-                pageCounter.innerText = `صفحة ${currentRealPage} / ${totalPages}`;
-            }
-
-            pageFlip.on('flip', (e) => {
-                updateCounter(e.data);
-            });
-
-            nextBtn.addEventListener('click', () => {
-                pageFlip.flipPrev('top-left');
-            });
-
-            prevBtn.addEventListener('click', () => {
-                pageFlip.flipNext('top-right');
-            });
         });
     </script>
 </body>
