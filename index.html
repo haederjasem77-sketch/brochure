@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>البروشور التفاعلي</title>
+    <!-- مكتبة انثناء وتقليب الأوراق الاحترافية -->
+    <script src="https://cdn.jsdelivr.net/npm/page-flip@2.0.7/dist/js/page-flip.browser.js"></script>
     <style>
         * {
             box-sizing: border-box;
@@ -21,76 +23,54 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
-            padding: 15px 10px;
+            justify-content: space-between;
+            padding: 10px 0;
             overflow: hidden;
             touch-action: none;
         }
 
         .instructions {
-            margin-bottom: 12px;
             font-size: 14px;
             color: #cbd5e1;
             text-align: center;
+            padding: 5px;
         }
 
-        /* إطار العرض - صفحة واحدة مركزية فقط بدون أي أطراف سوداء */
-        .container {
-            width: 100%;
-            max-width: 380px;
-            height: 70vh;
-            max-height: 560px;
+        /* حاوية العرض لتوسيع البروشور على كامل شاشة الهاتف */
+        .wrapper {
+            width: 100vw;
+            height: 80vh;
             display: flex;
             justify-content: center;
             align-items: center;
-            perspective: 1200px;
-            position: relative;
-        }
-
-        .book {
-            position: relative;
-            width: 100%;
-            height: 100%;
-            background-color: transparent;
-        }
-
-        /* الأوراق كأنها ورق مجلة ناعم وليس كرتون صلب */
-        .page {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            top: 0;
-            left: 0;
-            background-color: #ffffff;
-            border-radius: 12px;
             overflow: hidden;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.4);
-            transform-origin: right center; /* التقليب من الطرف الأيسر للأيمن */
-            transition: transform 0.5s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.4s ease;
-            will-change: transform, opacity;
         }
 
-        .page img {
+        #book {
+            box-shadow: 0 12px 35px rgba(0, 0, 0, 0.7);
+        }
+
+        /* إزالة أي إطار أبيض والجعل الصورة تملأ الصفحة بالكامل */
+        .my-page {
+            background-color: #0f172a;
             width: 100%;
             height: 100%;
-            object-fit: contain; /* إظهار الصورة كاملة بدون قص */
-            background-color: #ffffff;
-            pointer-events: none;
+            overflow: hidden;
         }
 
-        /* انثناء وتلاشي الورقة عند التقليب */
-        .page.flipped {
-            transform: rotateY(120deg) translateX(-50px) scale(0.9);
-            opacity: 0;
-            pointer-events: none;
+        .my-page img {
+            width: 100%;
+            height: 100%;
+            object-fit: fill; /* تملأ الورقة بالكامل بدون أطراف */
+            display: block;
         }
 
         .controls {
-            margin-top: 20px;
             display: flex;
             gap: 15px;
             align-items: center;
             z-index: 100;
+            padding-bottom: 10px;
         }
 
         .btn {
@@ -103,16 +83,11 @@
             border-radius: 20px;
             cursor: pointer;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-            transition: transform 0.1s ease;
         }
 
         .btn:disabled {
             opacity: 0.3;
             cursor: not-allowed;
-        }
-
-        .btn:active:not(:disabled) {
-            transform: scale(0.95);
         }
 
         .page-num {
@@ -126,17 +101,16 @@
 </head>
 <body>
 
-    <div class="instructions">اسحب الصفحة يساراً أو يميناً لتقليب الورقة 👈</div>
+    <div class="instructions">👈 اسحب طرف الورقة بالأصبع لانثنائها وتقليبها</div>
 
-    <div class="container">
-        <div class="book" id="book">
-            <!-- ترتيب أوراق البروشور الملونة بالكامل بدون أي صفحات سوداء -->
-            <div class="page" style="z-index: 6;"><img src="1.jpg" alt="غلاف البروشور"></div>
-            <div class="page" style="z-index: 5;"><img src="2.jpg" alt="صفحة 2"></div>
-            <div class="page" style="z-index: 4;"><img src="3.jpg" alt="صفحة 3"></div>
-            <div class="page" style="z-index: 3;"><img src="4.jpg" alt="صفحة 4"></div>
-            <div class="page" style="z-index: 2;"><img src="5.jpg" alt="صفحة 5"></div>
-            <div class="page" style="z-index: 1;"><img src="6.jpg" alt="الغلاف الخلفي"></div>
+    <div class="wrapper">
+        <div id="book">
+            <div class="my-page"><img src="1.jpg" alt="صفحة 1"></div>
+            <div class="my-page"><img src="2.jpg" alt="صفحة 2"></div>
+            <div class="my-page"><img src="3.jpg" alt="صفحة 3"></div>
+            <div class="my-page"><img src="4.jpg" alt="صفحة 4"></div>
+            <div class="my-page"><img src="5.jpg" alt="صفحة 5"></div>
+            <div class="my-page"><img src="6.jpg" alt="صفحة 6"></div>
         </div>
     </div>
 
@@ -147,68 +121,44 @@
     </div>
 
     <script>
-        const pages = Array.from(document.querySelectorAll('.page'));
-        const totalPages = pages.length;
-        let currentPage = 0;
+        document.addEventListener('DOMContentLoaded', function() {
+            // حساب الأبعاد تلقائياً لتكبير العرض على الهواتف
+            const screenWidth = window.innerWidth;
+            const screenHeight = window.innerHeight;
+            
+            const bookWidth = screenWidth > 500 ? 450 : Math.floor(screenWidth * 0.95);
+            const bookHeight = Math.floor(screenHeight * 0.78);
 
-        const prevBtn = document.getElementById('prev-btn');
-        const nextBtn = document.getElementById('next-btn');
-        const pageInfo = document.getElementById('page-info');
-
-        function updateBook() {
-            pages.forEach((page, index) => {
-                if (index < currentPage) {
-                    page.classList.add('flipped');
-                } else {
-                    page.classList.remove('flipped');
-                    page.style.zIndex = totalPages - index;
-                }
+            const pageFlip = new St.PageFlip(document.getElementById('book'), {
+                width: bookWidth,
+                height: bookHeight,
+                size: "fixed",
+                minWidth: 280,
+                maxWidth: 600,
+                minHeight: 400,
+                maxHeight: 900,
+                maxShadowOpacity: 0.7, // كثافة ظل انثناء الورقة
+                showCover: false,
+                mobileScrollSupport: false,
+                usePortrait: true, // صفحة واحدة كبيرة على الشاشة العمودية
+                flippingTime: 700
             });
 
-            pageInfo.innerText = `صفحة ${currentPage + 1} / ${totalPages}`;
-            prevBtn.disabled = currentPage === 0;
-            nextBtn.disabled = currentPage === totalPages - 1;
-        }
+            pageFlip.loadFromHTML(document.querySelectorAll('.my-page'));
 
-        nextBtn.addEventListener('click', () => {
-            if (currentPage < totalPages - 1) {
-                currentPage++;
-                updateBook();
-            }
+            const prevBtn = document.getElementById('prev-btn');
+            const nextBtn = document.getElementById('next-btn');
+            const pageInfo = document.getElementById('page-info');
+
+            pageFlip.on('flip', (e) => {
+                pageInfo.innerText = `صفحة ${e.data + 1} / ${pageFlip.getPageCount()}`;
+                prevBtn.disabled = e.data === 0;
+                nextBtn.disabled = e.data === pageFlip.getPageCount() - 1;
+            });
+
+            prevBtn.addEventListener('click', () => pageFlip.flipPrev());
+            nextBtn.addEventListener('click', () => pageFlip.flipNext());
         });
-
-        prevBtn.addEventListener('click', () => {
-            if (currentPage > 0) {
-                currentPage--;
-                updateBook();
-            }
-        });
-
-        // حركة السحب باللمس على الموبايل
-        let startX = 0;
-        const book = document.getElementById('book');
-
-        book.addEventListener('touchstart', (e) => {
-            startX = e.touches[0].clientX;
-        }, {passive: true});
-
-        book.addEventListener('touchend', (e) => {
-            const endX = e.changedTouches[0].clientX;
-            const diffX = startX - endX;
-
-            // السحب لليسار: انتقل للصفحة التالية
-            if (diffX > 40 && currentPage < totalPages - 1) {
-                currentPage++;
-                updateBook();
-            } 
-            // السحب لليمن: ارجع للصفحة السابقة
-            else if (diffX < -40 && currentPage > 0) {
-                currentPage--;
-                updateBook();
-            }
-        }, {passive: true});
-
-        updateBook();
     </script>
 </body>
 </html>
