@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="ar">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -23,16 +23,20 @@
             touch-action: none;
         }
 
-        .container {
-            width: 100%;
-            height: 100%;
+        /* تقييد العرض ليجبر المكتبة على نمط الصفحة المنفردة دائماً */
+        .book-wrapper {
+            width: 92vw;
+            max-width: 420px;
+            height: 82vh;
+            max-height: 650px;
             display: flex;
             justify-content: center;
             align-items: center;
-            padding: 10px;
         }
 
         #book {
+            width: 100%;
+            height: 100%;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
         }
 
@@ -53,8 +57,9 @@
 </head>
 <body>
 
-    <div class="container">
-        <div id="book">
+    <div class="book-wrapper">
+        <!-- dir="ltr" تضمن عمل إحداثيات السحب باللمس بدون تعارض -->
+        <div id="book" dir="ltr">
             <div class="my-page"><img src="1.jpg" alt="1"></div>
             <div class="my-page"><img src="2.jpg" alt="2"></div>
             <div class="my-page"><img src="3.jpg" alt="3"></div>
@@ -72,12 +77,12 @@
                 height: 600,
                 size: "stretch",
                 minWidth: 280,
-                maxWidth: 480,
-                minHeight: 420,
-                maxHeight: 720,
+                maxWidth: 420,
+                minHeight: 400,
+                maxHeight: 650,
                 maxShadowOpacity: 0.8,
-                showCover: false,      /* إلغاء وضعية الغلاف */
-                usePortrait: true,    /* إجبار النظام على عرض صفحة واحدة منفردة دائماً */
+                showCover: false,
+                usePortrait: true,
                 mobileScrollSupport: false
             });
 
