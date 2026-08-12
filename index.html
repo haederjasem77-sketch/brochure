@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>البروشور التفاعلي</title>
+    <title>البروشور التفاعلي العربي</title>
     <style>
         * {
             box-sizing: border-box;
@@ -14,47 +14,43 @@
         html, body {
             width: 100%;
             height: 100%;
-            margin: 0;
-            padding: 0;
             overflow: hidden;
             background-color: #000000;
             position: fixed;
             top: 0;
             left: 0;
-            right: 0;
-            bottom: 0;
             touch-action: none;
             user-select: none;
             -webkit-user-select: none;
         }
 
-        .container {
+        #viewport {
             width: 100vw;
             height: 100vh;
             height: 100dvh;
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-        }
-
-        #book {
-            width: 100% !important;
-            height: 100% !important;
-        }
-
-        .my-page {
-            width: 100% !important;
-            height: 100% !important;
+            display: flex;
+            justify-content: center;
+            align-items: center;
             background-color: #000000;
-            overflow: hidden;
         }
 
-        .my-page img {
-            width: 100% !important;
-            height: 100% !important;
-            object-fit: fill !important;
+        #flipbook {
+            width: 100vw;
+            height: 100vh;
+            height: 100dvh;
+        }
+
+        #flipbook .page {
+            width: 100vw;
+            height: 100vh;
+            height: 100dvh;
+            background-color: #000000;
+        }
+
+        #flipbook img {
+            width: 100%;
+            height: 100%;
+            object-fit: fill;
             display: block;
             pointer-events: none;
         }
@@ -62,45 +58,70 @@
 </head>
 <body>
 
-    <div class="container">
-        <div id="book">
-            <div class="my-page"><img src="6.jpg" alt="6"></div>
-            <div class="my-page"><img src="5.jpg" alt="5"></div>
-            <div class="my-page"><img src="4.jpg" alt="4"></div>
-            <div class="my-page"><img src="3.jpg" alt="3"></div>
-            <div class="my-page"><img src="2.jpg" alt="2"></div>
-            <div class="my-page"><img src="1.jpg" alt="1"></div>
+    <div id="viewport">
+        <div id="flipbook">
+            <!-- ترتيب الصفحات الطبيعي من 1 إلى 6 -->
+            <div class="page"><img src="1.jpg" alt="1"></div>
+            <div class="page"><img src="2.jpg" alt="2"></div>
+            <div class="page"><img src="3.jpg" alt="3"></div>
+            <div class="page"><img src="4.jpg" alt="4"></div>
+            <div class="page"><img src="5.jpg" alt="5"></div>
+            <div class="page"><img src="6.jpg" alt="6"></div>
         </div>
     </div>
 
-    <!-- محرك انثناء الورق 3D المرن -->
-    <script src="https://cdn.jsdelivr.net/npm/page-flip@2.0.7/dist/js/page-flip.browser.js"></script>
+    <!-- مكتبات Turn.js للانثناء الورقي الحقيقي -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/turn.js/4.1.0/turn.min.js"></script>
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const bookElem = document.getElementById('book');
+        $(document).ready(function() {
+            var $book = $('#flipbook');
+            var winWidth = $(window).width();
+            var winHeight = $(window).height();
 
-            const pageFlip = new St.PageFlip(bookElem, {
-                width: window.innerWidth,
-                height: window.innerHeight,
-                size: "stretch",
-                minWidth: 200,
-                maxWidth: 2500,
-                minHeight: 300,
-                maxHeight: 2500,
-                maxShadowOpacity: 0.85, /* ظلال مكثفة لإبراز قوس وتعرج الورقة أثناء الطي */
-                showCover: false,      /* إلغاء أي غلاف صلب */
-                usePortrait: true,
-                startPage: 5,         /* البدء بالصفحة رقم 1 */
-                mobileScrollSupport: false,
-                flippingTime: 800,     /* زمن انثناء مرن لإظهار حركة انحناء الورقة */
-                useMouseEvents: true,
-                showPageCorners: true, /* إظهار زاوية الورقة وهي تنثني وتلتف مع اللمس */
-                clickEventForward: false,
-                swipeDistance: 15
+            // تهيئة محرك Turn.js للانثناء الورقي العربي
+            $book.turn({
+                width: winWidth,
+                height: winHeight,
+                autoCenter: true,
+                display: 'single',
+                direction: 'rtl',     /* نظام القراءة العربي */
+                duration: 800,        /* سرعة انثناء الورقة */
+                gradients: true,      /* إظهار ظلال الانحناء والتجعد الورقي */
+                elevation: 50,        /* ارتفاع الورقة 3D أثناء التقليب */
+                acceleration: true
             });
 
-            const pages = document.querySelectorAll('.my-page');
-            pageFlip.loadFromHTML(pages);
+            // ضبط الأبعاد تلقائياً عند تدوير الشاشة
+            $(window).resize(function() {
+                $book.turn('size', $(window).width(), $(window).height());
+            });
+
+            // حسّاس السحب باللمس للتقليب المرن
+            let startX = 0;
+            let startY = 0;
+
+            document.addEventListener('touchstart', function(e) {
+                startX = e.touches[0].clientX;
+                startY = e.touches[0].clientY;
+            }, { passive: true });
+
+            document.addEventListener('touchend', function(e) {
+                let endX = e.changedTouches[0].clientX;
+                let endY = e.changedTouches[0].clientY;
+                let diffX = endX - startX;
+                let diffY = endY - startY;
+
+                if (Math.abs(diffX) > 30 && Math.abs(diffX) > Math.abs(diffY)) {
+                    if (diffX > 0) {
+                        // سحب من اليسار إلى اليمين -> الصفحة التالية بالترتيب العربي
+                        $book.turn('next');
+                    } else {
+                        // سحب من اليمين إلى اليسار -> العودة للصفحة السابقة
+                        $book.turn('previous');
+                    }
+                }
+            }, { passive: true });
         });
     </script>
 </body>
