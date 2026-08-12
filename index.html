@@ -5,16 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>البروشور التفاعلي</title>
 
-    <!-- الرابط الرئيسي للمكتبة (unpkg) -->
-    <script src="https://unpkg.com/page-flip@2.0.7/build/js/page-flip.browser.js"></script>
-
-    <!-- الرابط الاحتياطي في حال حظر الرابط الأول -->
-    <script>
-        if (typeof St === 'undefined') {
-            document.write('<script src="https://cdn.jsdelivr.net/npm/page-flip@2.0.7/build/js/page-flip.browser.js"><\/script>');
-        }
-    </script>
-
     <style>
         * {
             box-sizing: border-box;
@@ -88,9 +78,17 @@
             font-weight: bold;
             font-size: 15px;
         }
+
+        #loading-msg {
+            color: #ffffff;
+            font-size: 16px;
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
+
+    <div id="loading-msg">جاري تحميل البروشور...</div>
 
     <div class="container">
         <div id="book" class="flip-book">
@@ -103,18 +101,51 @@
         </div>
     </div>
 
-    <div class="controls">
+    <div class="controls" id="controls" style="display: none;">
         <button class="btn" id="prev-btn">السابقة</button>
         <span class="page-num" id="page-info">صفحة 1</span>
         <button class="btn" id="next-btn">التالية</button>
     </div>
 
     <script>
-        window.addEventListener('load', function() {
-            if (typeof St === 'undefined' || !St.PageFlip) {
-                alert('تعذر تحميل المكتبة. يرجى إيقاف مانع الإعلانات (AdBlocker) إن وجد وإعادة التحديث.');
+        // قائمة بالمصادر البديلة لمكتبة التقليب
+        const cdnSources = [
+            "page-flip.browser.js", // الخيار المحلي أولاً
+            "https://fastly.jsdelivr.net/npm/page-flip@2.0.7/build/js/page-flip.browser.js",
+            "https://cdn.statically.io/npm/page-flip@2.0.7/build/js/page-flip.browser.js",
+            "https://unpkg.com/page-flip@2.0.7/build/js/page-flip.browser.js",
+            "https://cdn.jsdelivr.net/npm/page-flip@2.0.7/build/js/page-flip.browser.js"
+        ];
+
+        function loadScriptSequentially(index) {
+            if (index >= cdnSources.length) {
+                document.getElementById('loading-msg').innerText = "تعذر تحميل المكتبة من جميع المصادر. يرجى تطبيق الحل الثاني (رفع الملف محلياً).";
+                document.getElementById('loading-msg').style.color = "#ff6b6b";
                 return;
             }
+
+            const script = document.createElement('script');
+            script.src = cdnSources[index];
+
+            script.onload = function() {
+                initFlipBook();
+            };
+
+            script.onerror = function() {
+                // في حال فشل المصدر، يتم التجربة مع المصدر التالي
+                loadScriptSequentially(index + 1);
+            };
+
+            document.head.appendChild(script);
+        }
+
+        function initFlipBook() {
+            if (typeof St === 'undefined' || !St.PageFlip) {
+                loadScriptSequentially(1);
+                return;
+            }
+
+            document.getElementById('loading-msg').style.display = 'none';
 
             const pageFlip = new St.PageFlip(
                 document.getElementById('book'),
@@ -134,6 +165,7 @@
 
             pageFlip.loadFromHTML(document.querySelectorAll('.page'));
             document.getElementById('book').style.display = 'block';
+            document.getElementById('controls').style.display = 'flex';
 
             document.getElementById('next-btn').addEventListener('click', () => pageFlip.flipNext());
             document.getElementById('prev-btn').addEventListener('click', () => pageFlip.flipPrev());
@@ -141,6 +173,11 @@
             pageFlip.on('flip', (e) => {
                 document.getElementById('page-info').innerText = `صفحة ${e.data + 1}`;
             });
+        }
+
+        // بدء التحميل
+        window.addEventListener('load', () => {
+            loadScriptSequentially(0);
         });
     </script>
 </body>
