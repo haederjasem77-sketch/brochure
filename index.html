@@ -22,7 +22,7 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            padding: 10px;
+            padding: 15px 10px;
             overflow: hidden;
             touch-action: none;
         }
@@ -30,30 +30,31 @@
         .instructions {
             margin-bottom: 12px;
             font-size: 14px;
-            color: #94a3b8;
+            color: #cbd5e1;
             text-align: center;
         }
 
+        /* إطار العرض - صفحة واحدة مركزية فقط بدون أي أطراف سوداء */
         .container {
             width: 100%;
-            max-width: 400px;
+            max-width: 380px;
+            height: 70vh;
+            max-height: 560px;
             display: flex;
             justify-content: center;
             align-items: center;
             perspective: 1200px;
+            position: relative;
         }
 
         .book {
             position: relative;
             width: 100%;
-            height: 72vh;
-            max-height: 580px;
-            background-color: #ffffff;
-            border-radius: 8px;
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6);
-            transform-style: preserve-3d;
+            height: 100%;
+            background-color: transparent;
         }
 
+        /* الأوراق كأنها ورق مجلة ناعم وليس كرتون صلب */
         .page {
             position: absolute;
             width: 100%;
@@ -61,41 +62,31 @@
             top: 0;
             left: 0;
             background-color: #ffffff;
-            transform-origin: left center;
-            transform-style: preserve-3d;
-            border-radius: 0 8px 8px 0;
+            border-radius: 12px;
             overflow: hidden;
-            box-shadow: inset -3px 0 10px rgba(0,0,0,0.1);
-            cursor: grab;
-        }
-
-        .page:active {
-            cursor: grabbing;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+            transform-origin: right center; /* التقليب من الطرف الأيسر للأيمن */
+            transition: transform 0.5s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.4s ease;
+            will-change: transform, opacity;
         }
 
         .page img {
             width: 100%;
             height: 100%;
-            object-fit: contain;
+            object-fit: contain; /* إظهار الصورة كاملة بدون قص */
             background-color: #ffffff;
             pointer-events: none;
         }
 
-        /* ظل واقعي أثناء سحب الورقة */
-        .page-shadow {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(to right, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0) 100%);
-            pointer-events: none;
+        /* انثناء وتلاشي الورقة عند التقليب */
+        .page.flipped {
+            transform: rotateY(120deg) translateX(-50px) scale(0.9);
             opacity: 0;
-            transition: opacity 0.1s ease;
+            pointer-events: none;
         }
 
         .controls {
-            margin-top: 18px;
+            margin-top: 20px;
             display: flex;
             gap: 15px;
             align-items: center;
@@ -112,7 +103,7 @@
             border-radius: 20px;
             cursor: pointer;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-            transition: all 0.2s ease;
+            transition: transform 0.1s ease;
         }
 
         .btn:disabled {
@@ -135,16 +126,17 @@
 </head>
 <body>
 
-    <div class="instructions">امسك طرف الورقة بأصبعك وادرها للجهة الأخرى 👈</div>
+    <div class="instructions">اسحب الصفحة يساراً أو يميناً لتقليب الورقة 👈</div>
 
     <div class="container">
         <div class="book" id="book">
-            <div class="page" style="z-index: 6;"><img src="1.jpg" alt="غلاف البروشور"><div class="page-shadow"></div></div>
-            <div class="page" style="z-index: 5;"><img src="2.jpg" alt="صفحة 2"><div class="page-shadow"></div></div>
-            <div class="page" style="z-index: 4;"><img src="3.jpg" alt="صفحة 3"><div class="page-shadow"></div></div>
-            <div class="page" style="z-index: 3;"><img src="4.jpg" alt="صفحة 4"><div class="page-shadow"></div></div>
-            <div class="page" style="z-index: 2;"><img src="5.jpg" alt="صفحة 5"><div class="page-shadow"></div></div>
-            <div class="page" style="z-index: 1;"><img src="6.jpg" alt="الغلاف الخلفي"><div class="page-shadow"></div></div>
+            <!-- ترتيب أوراق البروشور الملونة بالكامل بدون أي صفحات سوداء -->
+            <div class="page" style="z-index: 6;"><img src="1.jpg" alt="غلاف البروشور"></div>
+            <div class="page" style="z-index: 5;"><img src="2.jpg" alt="صفحة 2"></div>
+            <div class="page" style="z-index: 4;"><img src="3.jpg" alt="صفحة 3"></div>
+            <div class="page" style="z-index: 3;"><img src="4.jpg" alt="صفحة 4"></div>
+            <div class="page" style="z-index: 2;"><img src="5.jpg" alt="صفحة 5"></div>
+            <div class="page" style="z-index: 1;"><img src="6.jpg" alt="الغلاف الخلفي"></div>
         </div>
     </div>
 
@@ -159,132 +151,64 @@
         const totalPages = pages.length;
         let currentPage = 0;
 
-        let isDragging = false;
-        let startX = 0;
-        let currentDragAngle = 0;
-        const bookWidth = document.getElementById('book').offsetWidth || 350;
-
         const prevBtn = document.getElementById('prev-btn');
         const nextBtn = document.getElementById('next-btn');
         const pageInfo = document.getElementById('page-info');
 
-        function updatePageUI() {
+        function updateBook() {
+            pages.forEach((page, index) => {
+                if (index < currentPage) {
+                    page.classList.add('flipped');
+                } else {
+                    page.classList.remove('flipped');
+                    page.style.zIndex = totalPages - index;
+                }
+            });
+
             pageInfo.innerText = `صفحة ${currentPage + 1} / ${totalPages}`;
             prevBtn.disabled = currentPage === 0;
             nextBtn.disabled = currentPage === totalPages - 1;
         }
 
-        // إعداد المستويات Z-Index
-        function resetStack() {
-            pages.forEach((page, index) => {
-                page.style.transition = 'transform 0.4s ease-out';
-                if (index < currentPage) {
-                    page.style.transform = 'rotateY(-180deg)';
-                    page.style.zIndex = index + 1;
-                } else {
-                    page.style.transform = 'rotateY(0deg)';
-                    page.style.zIndex = totalPages - index;
-                }
-            });
-            updatePageUI();
-        }
-
-        // الأحداث للماوس واللمس
-        const book = document.getElementById('book');
-
-        function getClientX(e) {
-            return e.touches ? e.touches[0].clientX : e.clientX;
-        }
-
-        function startDrag(e) {
-            if (isDragging) return;
-            const x = getClientX(e);
-            const rect = book.getBoundingClientRect();
-            const clickX = x - rect.left;
-
-            // تحديد إذا كان السحب لتقليب الصفحة للأمام أم للخلف
-            if (clickX > rect.width * 0.3 && currentPage < totalPages - 1) {
-                isDragging = true;
-                startX = x;
-                pages[currentPage].style.transition = 'none';
-            } else if (clickX <= rect.width * 0.3 && currentPage > 0) {
-                isDragging = true;
-                startX = x;
-                currentPage--;
-                pages[currentPage].style.transition = 'none';
-                pages[currentPage].style.zIndex = totalPages + 1;
-            }
-        }
-
-        function moveDrag(e) {
-            if (!isDragging) return;
-            const currentX = getClientX(e);
-            const deltaX = startX - currentX;
-            
-            // حساب الزاوية بناءً على مسافة سحب الأصبع
-            let progress = deltaX / (bookWidth * 0.8);
-            progress = Math.max(0, Math.min(1, progress)); // حصر النسبة بين 0 و 1
-            
-            currentDragAngle = -180 * progress;
-            pages[currentPage].style.transform = `rotateY(${currentDragAngle}deg)`;
-
-            // إضافة ظل متدرج مع سحب الصفحة
-            const shadow = pages[currentPage].querySelector('.page-shadow');
-            if (shadow) {
-                shadow.style.opacity = Math.sin(progress * Math.PI) * 0.6;
-            }
-        }
-
-        function endDrag() {
-            if (!isDragging) return;
-            isDragging = false;
-
-            const activePage = pages[currentPage];
-            activePage.style.transition = 'transform 0.4s ease-out';
-
-            // إذا قطع الأصبع أكثر من نصف المسافة نكتمل التقليب، وإلا نرجع الصفحة
-            if (currentDragAngle < -70) {
-                activePage.style.transform = 'rotateY(-180deg)';
-                currentPage++;
-            } else {
-                activePage.style.transform = 'rotateY(0deg)';
-            }
-
-            const shadow = activePage.querySelector('.page-shadow');
-            if (shadow) shadow.style.opacity = '0';
-
-            setTimeout(resetStack, 300);
-        }
-
-        // مستمعات الأحداث للهواتف والكمبيوتر
-        book.addEventListener('mousedown', startDrag);
-        window.addEventListener('mousemove', moveDrag);
-        window.addEventListener('mouseup', endDrag);
-
-        book.addEventListener('touchstart', startDrag, {passive: true});
-        window.addEventListener('touchmove', moveDrag, {passive: true});
-        window.addEventListener('touchend', endDrag);
-
-        // أزرار التنقل السريع
         nextBtn.addEventListener('click', () => {
             if (currentPage < totalPages - 1) {
-                pages[currentPage].style.transition = 'transform 0.5s ease';
-                pages[currentPage].style.transform = 'rotateY(-180deg)';
                 currentPage++;
-                setTimeout(resetStack, 400);
+                updateBook();
             }
         });
 
         prevBtn.addEventListener('click', () => {
             if (currentPage > 0) {
                 currentPage--;
-                pages[currentPage].style.transition = 'transform 0.5s ease';
-                pages[currentPage].style.transform = 'rotateY(0deg)';
-                setTimeout(resetStack, 400);
+                updateBook();
             }
         });
 
-        resetStack();
+        // حركة السحب باللمس على الموبايل
+        let startX = 0;
+        const book = document.getElementById('book');
+
+        book.addEventListener('touchstart', (e) => {
+            startX = e.touches[0].clientX;
+        }, {passive: true});
+
+        book.addEventListener('touchend', (e) => {
+            const endX = e.changedTouches[0].clientX;
+            const diffX = startX - endX;
+
+            // السحب لليسار: انتقل للصفحة التالية
+            if (diffX > 40 && currentPage < totalPages - 1) {
+                currentPage++;
+                updateBook();
+            } 
+            // السحب لليمن: ارجع للصفحة السابقة
+            else if (diffX < -40 && currentPage > 0) {
+                currentPage--;
+                updateBook();
+            }
+        }, {passive: true});
+
+        updateBook();
     </script>
 </body>
 </html>
