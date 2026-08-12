@@ -5,13 +5,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>البروشور التفاعلي</title>
 
-    <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
+    <!-- سيرفر Cloudflare العالمي السريع جداً -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/page-flip/2.0.7/page-flip.browser.js"></script>
 
+    <!-- احتياطي: الملف المحلي المرفوع بحسابك -->
+    <script>
+        if (typeof St === 'undefined') {
+            document.write('<script src="page-flip.browser.js"><\/script>');
+        }
+    </script>
+
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
         body {
             background-color: #1e293b;
             display: flex;
@@ -22,7 +27,6 @@
             font-family: system-ui, -apple-system, sans-serif;
             overflow-x: hidden;
         }
-
         .container {
             width: 100%;
             display: flex;
@@ -30,24 +34,12 @@
             align-items: center;
             padding: 20px 10px;
         }
-
         .flip-book {
             display: none;
             box-shadow: 0 10px 30px rgba(0,0,0,0.5);
         }
-
-        .page {
-            background-color: #ffffff;
-            overflow: hidden;
-        }
-
-        .page img {
-            width: 100%;
-            height: 100%;
-            object-fit: fill;
-            display: block;
-        }
-
+        .page { background-color: #ffffff; overflow: hidden; }
+        .page img { width: 100%; height: 100%; object-fit: fill; display: block; }
         .controls {
             margin-top: 20px;
             display: flex;
@@ -55,7 +47,6 @@
             align-items: center;
             z-index: 100;
         }
-
         .btn {
             background-color: #ffffff;
             color: #0f172a;
@@ -66,29 +57,12 @@
             border-radius: 20px;
             cursor: pointer;
             box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-            transition: transform 0.2s ease;
         }
-
-        .btn:active {
-            transform: scale(0.95);
-        }
-
-        .page-num {
-            color: #ffffff;
-            font-weight: bold;
-            font-size: 15px;
-        }
-
-        #loading-msg {
-            color: #ffffff;
-            font-size: 16px;
-            font-weight: bold;
-        }
+        .btn:active { transform: scale(0.95); }
+        .page-num { color: #ffffff; font-weight: bold; font-size: 15px; }
     </style>
 </head>
 <body>
-
-    <div id="loading-msg">جاري تحميل البروشور...</div>
 
     <div class="container">
         <div id="book" class="flip-book">
@@ -101,51 +75,18 @@
         </div>
     </div>
 
-    <div class="controls" id="controls" style="display: none;">
+    <div class="controls">
         <button class="btn" id="prev-btn">السابقة</button>
         <span class="page-num" id="page-info">صفحة 1</span>
         <button class="btn" id="next-btn">التالية</button>
     </div>
 
     <script>
-        // قائمة بالمصادر البديلة لمكتبة التقليب
-        const cdnSources = [
-            "page-flip.browser.js", // الخيار المحلي أولاً
-            "https://fastly.jsdelivr.net/npm/page-flip@2.0.7/build/js/page-flip.browser.js",
-            "https://cdn.statically.io/npm/page-flip@2.0.7/build/js/page-flip.browser.js",
-            "https://unpkg.com/page-flip@2.0.7/build/js/page-flip.browser.js",
-            "https://cdn.jsdelivr.net/npm/page-flip@2.0.7/build/js/page-flip.browser.js"
-        ];
-
-        function loadScriptSequentially(index) {
-            if (index >= cdnSources.length) {
-                document.getElementById('loading-msg').innerText = "تعذر تحميل المكتبة من جميع المصادر. يرجى تطبيق الحل الثاني (رفع الملف محلياً).";
-                document.getElementById('loading-msg').style.color = "#ff6b6b";
-                return;
-            }
-
-            const script = document.createElement('script');
-            script.src = cdnSources[index];
-
-            script.onload = function() {
-                initFlipBook();
-            };
-
-            script.onerror = function() {
-                // في حال فشل المصدر، يتم التجربة مع المصدر التالي
-                loadScriptSequentially(index + 1);
-            };
-
-            document.head.appendChild(script);
-        }
-
-        function initFlipBook() {
+        window.addEventListener('load', function() {
             if (typeof St === 'undefined' || !St.PageFlip) {
-                loadScriptSequentially(1);
+                alert('تعذر تحميل المكتبة. يرجى إعادة تحديث الصفحة.');
                 return;
             }
-
-            document.getElementById('loading-msg').style.display = 'none';
 
             const pageFlip = new St.PageFlip(
                 document.getElementById('book'),
@@ -153,10 +94,6 @@
                     width: 360,
                     height: 520,
                     size: 'fixed',
-                    minWidth: 280,
-                    maxWidth: 450,
-                    minHeight: 400,
-                    maxHeight: 650,
                     maxShadowOpacity: 0.5,
                     showCover: true,
                     mobileScrollSupport: false
@@ -165,7 +102,6 @@
 
             pageFlip.loadFromHTML(document.querySelectorAll('.page'));
             document.getElementById('book').style.display = 'block';
-            document.getElementById('controls').style.display = 'flex';
 
             document.getElementById('next-btn').addEventListener('click', () => pageFlip.flipNext());
             document.getElementById('prev-btn').addEventListener('click', () => pageFlip.flipPrev());
@@ -173,11 +109,6 @@
             pageFlip.on('flip', (e) => {
                 document.getElementById('page-info').innerText = `صفحة ${e.data + 1}`;
             });
-        }
-
-        // بدء التحميل
-        window.addEventListener('load', () => {
-            loadScriptSequentially(0);
         });
     </script>
 </body>
