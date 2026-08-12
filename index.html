@@ -28,7 +28,6 @@
             -webkit-user-select: none;
         }
 
-        /* حاوية تغطي الشاشة بالكامل 100% */
         .container {
             width: 100vw;
             height: 100vh;
@@ -52,7 +51,6 @@
             overflow: hidden;
         }
 
-        /* تجعل الصورة تملأ كامل الشاشة بدون أي فراغات أو حواف */
         .my-page img {
             width: 100% !important;
             height: 100% !important;
@@ -75,61 +73,33 @@
         </div>
     </div>
 
+    <!-- محرك انثناء الورق 3D الفيزيائي -->
     <script src="https://cdn.jsdelivr.net/npm/page-flip@2.0.7/dist/js/page-flip.browser.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const bookElem = document.getElementById('book');
-            const width = window.innerWidth;
-            const height = window.innerHeight;
 
             const pageFlip = new St.PageFlip(bookElem, {
-                width: width,
-                height: height,
+                width: window.innerWidth,
+                height: window.innerHeight,
                 size: "stretch",
                 minWidth: 200,
                 maxWidth: 2500,
                 minHeight: 300,
                 maxHeight: 2500,
-                maxShadowOpacity: 0.4,
+                maxShadowOpacity: 0.5,
                 showCover: false,
                 usePortrait: true,
-                startPage: 5, /* الصفحة الأولى */
+                startPage: 5, /* يبدأ بالصفحة رقم 1 */
                 mobileScrollSupport: false,
-                flippingTime: 500, /* سرعة وسلاسة انثناء الورقة */
-                useMouseEvents: true,
-                swipeDistance: 15,
-                clickEventForward: true
+                flippingTime: 600,
+                useMouseEvents: true, /* تفعيل السحب والطي باللمس المباشر */
+                clickEventForward: false,
+                swipeDistance: 20
             });
 
             const pages = document.querySelectorAll('.my-page');
             pageFlip.loadFromHTML(pages);
-
-            // حساس لمس ذكي لضمان سلاسة السحب في أي مكان على الشاشة
-            let startX = 0;
-            let startY = 0;
-
-            window.addEventListener('touchstart', function(e) {
-                startX = e.touches[0].clientX;
-                startY = e.touches[0].clientY;
-            }, { passive: true });
-
-            window.addEventListener('touchend', function(e) {
-                const endX = e.changedTouches[0].clientX;
-                const endY = e.changedTouches[0].clientY;
-                const diffX = endX - startX;
-                const diffY = endY - startY;
-
-                // التاكد من أن السحب أفقياً
-                if (Math.abs(diffX) > 35 && Math.abs(diffX) > Math.abs(diffY)) {
-                    if (diffX > 0) {
-                        // سحب من اليسار إلى اليمين -> انتقل للصفحة التالية بانثناء الورقة
-                        pageFlip.flipPrev('top-left');
-                    } else {
-                        // سحب من اليمين إلى اليسار -> عودة للصفحة السابقة بانثناء الورقة
-                        pageFlip.flipNext('top-right');
-                    }
-                }
-            }, { passive: true });
         });
     </script>
 </body>
