@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>البروشور التفاعلي</title>
-    <!-- تحميل المكتبة في الهيد لضمان جاهزيتها تماماً قبل تشغيل الكود -->
+    <!-- تحميل مكتبة التقليب في الهيد -->
     <script src="https://unpkg.com/page-flip@2.0.7/build/js/page-flip.browser.js"></script>
     <style>
         * {
@@ -26,6 +26,7 @@
 
         .container {
             width: 100%;
+            max-width: 900px;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -34,7 +35,7 @@
 
         .flip-book {
             box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-            display: none;
+            background-color: transparent;
         }
 
         .page {
@@ -46,10 +47,11 @@
             width: 100%;
             height: 100%;
             object-fit: fill;
+            display: block;
         }
 
         .controls {
-            margin-top: 15px;
+            margin-top: 20px;
             display: flex;
             gap: 15px;
             align-items: center;
@@ -66,7 +68,7 @@
             border-radius: 20px;
             cursor: pointer;
             box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-            transition: all 0.2s ease;
+            transition: transform 0.2s ease;
         }
 
         .btn:active {
@@ -84,12 +86,15 @@
 
     <div class="container">
         <div id="book" class="flip-book">
-            <div class="page"><img src="1.jpg" alt="غلاف البروشور"></div>
+            <!-- غلاف البروشور -->
+            <div class="page" data-density="hard"><img src="1.jpg" alt="غلاف البروشور"></div>
+            <!-- الصفحات الداخلية -->
             <div class="page"><img src="2.jpg" alt="صفحة 2"></div>
             <div class="page"><img src="3.jpg" alt="صفحة 3"></div>
             <div class="page"><img src="4.jpg" alt="صفحة 4"></div>
             <div class="page"><img src="5.jpg" alt="صفحة 5"></div>
-            <div class="page"><img src="6.jpg" alt="الغلاف الخلفي"></div>
+            <!-- الغلاف الخلفي -->
+            <div class="page" data-density="hard"><img src="6.jpg" alt="الغلاف الخلفي"></div>
         </div>
     </div>
 
@@ -102,29 +107,30 @@
     <script>
         window.addEventListener('load', function() {
             if (typeof St === 'undefined') {
-                alert('عذراً، تعذر تحميل مكتبة تقليب الصفحات. يرجى التأكد من الاتصال بالإنترنت وإعادة تحديث الصفحة.');
+                alert('عذراً، تعذر تحميل مكتبة التقليب. يرجى إعادة تحديث الصفحة.');
                 return;
             }
 
             const pageFlip = new St.PageFlip(
                 document.getElementById('book'),
                 {
-                    width: 400,
-                    height: 600,
-                    size: 'stretch',
+                    width: 400,        // عرض الصفحة الواحدة
+                    height: 600,       // ارتفاع الصفحة الواحدة
+                    size: 'stretch',   // تجعل الحجم يتكيف مع الموبايل والكمبيوتر
                     minWidth: 280,
                     maxWidth: 500,
                     minHeight: 400,
                     maxHeight: 750,
                     maxShadowOpacity: 0.5,
-                    showCover: true,
+                    showCover: true,   // إظهار الغلاف كصفحة فردية في البداية
                     mobileScrollSupport: false
                 }
             );
 
+            // تحميل الصفحات بعد اكتمال التحميل
             pageFlip.loadFromHTML(document.querySelectorAll('.page'));
-            document.getElementById('book').style.display = 'block';
 
+            // أزرار التحكم
             document.getElementById('next-btn').addEventListener('click', () => {
                 pageFlip.flipNext();
             });
@@ -133,6 +139,7 @@
                 pageFlip.flipPrev();
             });
 
+            // تحديث رقم الصفحة
             pageFlip.on('flip', (e) => {
                 document.getElementById('page-info').innerText = `صفحة ${e.data + 1}`;
             });
