@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>البروشور التفاعلي</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: #1e293b;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            font-family: system-ui, -apple-system, sans-serif;
+            overflow-x: hidden;
+        }
+
+        .container {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px 10px;
+        }
+
+        .flip-book {
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            display: none;
+        }
+
+        .page {
+            background-color: #ffffff;
+            overflow: hidden;
+        }
+
+        .page img {
+            width: 100%;
+            height: 100%;
+            object-fit: fill;
+        }
+
+        .controls {
+            margin-top: 15px;
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            z-index: 100;
+        }
+
+        .btn {
+            background-color: #ffffff;
+            color: #0f172a;
+            border: none;
+            padding: 10px 22px;
+            font-size: 15px;
+            font-weight: bold;
+            border-radius: 20px;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            transition: all 0.2s ease;
+        }
+
+        .btn:active {
+            transform: scale(0.95);
+        }
+
+        .page-num {
+            color: #ffffff;
+            font-weight: bold;
+            font-size: 15px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div id="book" class="flip-book">
+            <!-- ضَع صفحات البروشور هنا بالترتيب -->
+            <div class="page"><img src="1.jpg" alt="غلاف البروشور"></div>
+            <div class="page"><img src="2.jpg" alt="صفحة 2"></div>
+            <div class="page"><img src="3.jpg" alt="صفحة 3"></div>
+            <div class="page"><img src="4.jpg" alt="صفحة 4"></div>
+            <div class="page"><img src="5.jpg" alt="صفحة 5"></div>
+            <div class="page"><img src="6.jpg" alt="الغلاف الخلفي"></div>
+        </div>
+    </div>
+
+    <div class="controls">
+        <button class="btn" id="prev-btn">السابقة</button>
+        <span class="page-num" id="page-info">صفحة 1</span>
+        <button class="btn" id="next-btn">التالية</button>
+    </div>
+
+    <!-- مكتبة التقليب التفاعلية -->
+    <script src="https://cdn.jsdelivr.net/npm/page-flip@2.0.7/build/js/page-flip.browser.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const pageFlip = new St.PageFlip(
+                document.getElementById('book'),
+                {
+                    width: 400,        // عرض الصفحة الواحدة
+                    height: 600,       // ارتفاع الصفحة الواحدة
+                    size: 'stretch',
+                    minWidth: 280,
+                    maxWidth: 500,
+                    minHeight: 400,
+                    maxHeight: 750,
+                    maxShadowOpacity: 0.5, // ظل التقليب الـ 3D
+                    showCover: true,       // جعل الصفحة الأولى خيرة كغلاف
+                    mobileScrollSupport: false
+                }
+            );
+
+            // تحميل الصفحات
+            pageFlip.loadFromHTML(document.querySelectorAll('.page'));
+            document.getElementById('book').style.display = 'block';
+
+            // أزرار التحكم
+            document.getElementById('next-btn').addEventListener('click', () => {
+                pageFlip.flipNext();
+            });
+
+            document.getElementById('prev-btn').addEventListener('click', () => {
+                pageFlip.flipPrev();
+            });
+
+            // تحديث رقم الصفحة عند التقليب
+            pageFlip.on('flip', (e) => {
+                document.getElementById('page-info').innerText = `صفحة ${e.data + 1}`;
+            });
+        });
+    </script>
+</body>
+</html>
