@@ -25,6 +25,13 @@
             user-select: none;
         }
 
+        .hint-text {
+            color: #cbd5e1;
+            font-size: 14px;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
         .container {
             width: 92vw;
             max-width: 420px;
@@ -41,7 +48,6 @@
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
         }
 
-        /* يجعل كل الصفحات أوراقاً مرنة بدون إطارات */
         .my-page {
             background-color: #0f172a;
             width: 100%;
@@ -57,7 +63,6 @@
             pointer-events: none;
         }
 
-        /* شريط التحكم والتنقل */
         .controls {
             display: flex;
             align-items: center;
@@ -91,14 +96,17 @@
 </head>
 <body>
 
+    <div class="hint-text">👈 اسحب من اليسار إلى اليمين لتقليب الصفحة العربية</div>
+
     <div class="container">
         <div id="book">
-            <div class="my-page"><img src="1.jpg" alt="1"></div>
-            <div class="my-page"><img src="2.jpg" alt="2"></div>
-            <div class="my-page"><img src="3.jpg" alt="3"></div>
-            <div class="my-page"><img src="4.jpg" alt="4"></div>
-            <div class="my-page"><img src="5.jpg" alt="5"></div>
+            <!-- تم عكس ترتيب الصفحات هنا ليتوافق اتجاه التقليب 3D مع القراءة العربية -->
             <div class="my-page"><img src="6.jpg" alt="6"></div>
+            <div class="my-page"><img src="5.jpg" alt="5"></div>
+            <div class="my-page"><img src="4.jpg" alt="4"></div>
+            <div class="my-page"><img src="3.jpg" alt="3"></div>
+            <div class="my-page"><img src="2.jpg" alt="2"></div>
+            <div class="my-page"><img src="1.jpg" alt="1"></div>
         </div>
     </div>
 
@@ -108,7 +116,7 @@
         <button class="btn" id="prev-btn">👉 السابقة</button>
     </div>
 
-    <!-- محرك انثناء الورق الحقيقي PageFlip -->
+    <!-- محرك انثناء الورق 3D -->
     <script src="https://cdn.jsdelivr.net/npm/page-flip@2.0.7/dist/js/page-flip.browser.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
@@ -121,32 +129,40 @@
                 minHeight: 400,
                 maxHeight: 650,
                 maxShadowOpacity: 0.6,
-                showCover: false,       /* تجعل كل الصفحات أوراقاً مرنة بدون غلاف سميك */
-                usePortrait: true,     /* عرض صفحة واحدة منفردة دائماً */
+                showCover: false,
+                usePortrait: true,
+                startPage: 5, /* البدء بالصفحة الأولى (1.jpg) في الترتيب المعكوس */
                 mobileScrollSupport: false,
                 flippingTime: 700
             });
 
             const pages = document.querySelectorAll('.my-page');
+            const totalPages = pages.length;
             pageFlip.loadFromHTML(pages);
 
             const pageCounter = document.getElementById('page-counter');
             const nextBtn = document.getElementById('next-btn');
             const prevBtn = document.getElementById('prev-btn');
 
-            // تحديث رقم الصفحة عند التقليب
+            // حساب ورقم الصفحة الصحيح
+            function updateCounter(pageIndex) {
+                const currentRealPage = totalPages - pageIndex;
+                pageCounter.innerText = `صفحة ${currentRealPage} / ${totalPages}`;
+            }
+
+            // تحديث العداد أثناء السحب باللمس
             pageFlip.on('flip', (e) => {
-                pageCounter.innerText = `صفحة ${e.data + 1} / ${pages.length}`;
+                updateCounter(e.data);
             });
 
-            // التقليب للورقة التالية بانثناء الورقة
+            // التقليب للأمام: انثناء من اليسار إلى اليمين
             nextBtn.addEventListener('click', () => {
-                pageFlip.flipNext('top-right');
+                pageFlip.flipPrev('top-left');
             });
 
-            // العودة للورقة السابقة بانثناء الورقة
+            // التقليب للخلف: انثناء من اليمين إلى اليسار
             prevBtn.addEventListener('click', () => {
-                pageFlip.flipPrev('top-left');
+                pageFlip.flipNext('top-right');
             });
         });
     </script>
