@@ -62,16 +62,17 @@
 
     <div class="container">
         <div id="book">
-            <div class="page"><img src="6.jpg" alt="6"></div>
-            <div class="page"><img src="5.jpg" alt="5"></div>
-            <div class="page"><img src="4.jpg" alt="4"></div>
-            <div class="page"><img src="3.jpg" alt="3"></div>
-            <div class="page"><img src="2.jpg" alt="2"></div>
+            <!-- الترتيب الطبيعي للصفحات -->
             <div class="page"><img src="1.jpg" alt="1"></div>
+            <div class="page"><img src="2.jpg" alt="2"></div>
+            <div class="page"><img src="3.jpg" alt="3"></div>
+            <div class="page"><img src="4.jpg" alt="4"></div>
+            <div class="page"><img src="5.jpg" alt="5"></div>
+            <div class="page"><img src="6.jpg" alt="6"></div>
         </div>
     </div>
 
-    <!-- محرك انثناء الورق 3D الحديث والمستقر -->
+    <!-- محرك انثناء الورق 3D -->
     <script src="https://cdn.jsdelivr.net/npm/page-flip@2.0.7/dist/js/page-flip.browser.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
@@ -85,20 +86,19 @@
                 maxWidth: 2500,
                 minHeight: 300,
                 maxHeight: 2500,
-                maxShadowOpacity: 0.7,
+                maxShadowOpacity: 0.8,
                 showCover: false,
                 usePortrait: true,
-                startPage: 5, /* الصفحة الأولى 1.jpg */
+                startPage: 0,
                 mobileScrollSupport: false,
-                flippingTime: 650,
-                useMouseEvents: false, /* إيقاف سحب الحواف الافتراضي لمنع التجمّد */
+                flippingTime: 700,
+                useMouseEvents: true,
                 clickEventForward: false
             });
 
             const pages = document.querySelectorAll('.page');
             pageFlip.loadFromHTML(pages);
 
-            // حساس لمس مباشر وسريع بدون تعارض
             let startX = 0;
             let startY = 0;
 
@@ -113,14 +113,13 @@
                 let diffX = endX - startX;
                 let diffY = endY - startY;
 
-                // التثبت من السحب الأفقي
-                if (Math.abs(diffX) > 35 && Math.abs(diffX) > Math.abs(diffY)) {
+                if (Math.abs(diffX) > 30 && Math.abs(diffX) > Math.abs(diffY)) {
                     if (diffX > 0) {
-                        // سحب من اليسار إلى اليمين -> الصفحة التالية بالترتيب (1 -> 2 -> 3)
-                        pageFlip.flipPrev('top-left');
+                        // سحب من اليسار إلى اليمين -> التقليب للصفحة التالية (عربي) بانثناء ورقي 3D من اليسار
+                        pageFlip.flipNext('bottom-left');
                     } else {
                         // سحب من اليمين إلى اليسار -> العودة للصفحة السابقة
-                        pageFlip.flipNext('top-right');
+                        pageFlip.flipPrev('bottom-right');
                     }
                 }
             }, { passive: true });
