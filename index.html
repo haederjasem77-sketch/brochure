@@ -4,8 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>البروشور التفاعلي</title>
-    <!-- مكتبة انثناء وتقليب الأوراق الاحترافية -->
-    <script src="https://cdn.jsdelivr.net/npm/page-flip@2.0.7/dist/js/page-flip.browser.js"></script>
     <style>
         * {
             box-sizing: border-box;
@@ -19,146 +17,233 @@
             background-color: #0f172a;
             color: #ffffff;
             font-family: system-ui, -apple-system, sans-serif;
-            min-height: 100vh;
+            height: 100vh;
+            width: 100vw;
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: space-between;
-            padding: 10px 0;
+            justify-content: center;
             overflow: hidden;
             touch-action: none;
         }
 
-        .instructions {
+        .info-text {
             font-size: 14px;
             color: #cbd5e1;
+            margin-bottom: 8px;
             text-align: center;
-            padding: 5px;
         }
 
-        /* حاوية العرض لتوسيع البروشور على كامل شاشة الهاتف */
-        .wrapper {
-            width: 100vw;
-            height: 80vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            overflow: hidden;
+        /* حاوية العرض تكبر لتأخذ معظم مساحة شاشة الموبايل */
+        .book-wrapper {
+            width: 92vw;
+            max-width: 440px;
+            height: 82vh;
+            max-height: 680px;
+            position: relative;
+            perspective: 1600px;
         }
 
-        #book {
-            box-shadow: 0 12px 35px rgba(0, 0, 0, 0.7);
+        .book {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            transform-style: preserve-3d;
         }
 
-        /* إزالة أي إطار أبيض والجعل الصورة تملأ الصفحة بالكامل */
-        .my-page {
+        /* الصفحات بدون أي إطار أبيض إطلاقاً */
+        .page {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
             background-color: #0f172a;
-            width: 100%;
-            height: 100%;
+            transform-origin: left center;
+            transform-style: preserve-3d;
+            border-radius: 4px;
             overflow: hidden;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.6);
+            touch-action: none;
         }
 
-        .my-page img {
+        /* جعل الصورة تملأ المساحة بالكامل 100% دون حواف */
+        .page img {
             width: 100%;
             height: 100%;
-            object-fit: fill; /* تملأ الورقة بالكامل بدون أطراف */
+            object-fit: fill;
             display: block;
+            pointer-events: none;
         }
 
-        .controls {
-            display: flex;
-            gap: 15px;
-            align-items: center;
-            z-index: 100;
-            padding-bottom: 10px;
+        /* ظل انثناء الورقة الديناميكي أثناء سحب الأصبع */
+        .page-shadow {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to right, rgba(0,0,0,0) 20%, rgba(0,0,0,0.5) 80%, rgba(0,0,0,0.8) 100%);
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.1s ease;
         }
 
-        .btn {
-            background-color: #ffffff;
-            color: #0f172a;
-            border: none;
-            padding: 10px 22px;
-            font-size: 15px;
+        .page-indicator {
+            margin-top: 10px;
+            font-size: 14px;
             font-weight: bold;
-            border-radius: 20px;
-            cursor: pointer;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-        }
-
-        .btn:disabled {
-            opacity: 0.3;
-            cursor: not-allowed;
-        }
-
-        .page-num {
             color: #ffffff;
-            font-weight: bold;
-            font-size: 15px;
-            min-width: 90px;
-            text-align: center;
+            background: rgba(255, 255, 255, 0.15);
+            padding: 6px 18px;
+            border-radius: 20px;
         }
     </style>
 </head>
 <body>
 
-    <div class="instructions">👈 اسحب طرف الورقة بالأصبع لانثنائها وتقليبها</div>
+    <div class="info-text">👇 امسك طرف الصفحة بـ أصلعك واسحبها لتقليبها</div>
 
-    <div class="wrapper">
-        <div id="book">
-            <div class="my-page"><img src="1.jpg" alt="صفحة 1"></div>
-            <div class="my-page"><img src="2.jpg" alt="صفحة 2"></div>
-            <div class="my-page"><img src="3.jpg" alt="صفحة 3"></div>
-            <div class="my-page"><img src="4.jpg" alt="صفحة 4"></div>
-            <div class="my-page"><img src="5.jpg" alt="صفحة 5"></div>
-            <div class="my-page"><img src="6.jpg" alt="صفحة 6"></div>
+    <div class="book-wrapper">
+        <div class="book" id="book">
+            <div class="page" style="z-index: 6;"><img src="1.jpg" alt="1"><div class="page-shadow"></div></div>
+            <div class="page" style="z-index: 5;"><img src="2.jpg" alt="2"><div class="page-shadow"></div></div>
+            <div class="page" style="z-index: 4;"><img src="3.jpg" alt="3"><div class="page-shadow"></div></div>
+            <div class="page" style="z-index: 3;"><img src="4.jpg" alt="4"><div class="page-shadow"></div></div>
+            <div class="page" style="z-index: 2;"><img src="5.jpg" alt="5"><div class="page-shadow"></div></div>
+            <div class="page" style="z-index: 1;"><img src="6.jpg" alt="6"><div class="page-shadow"></div></div>
         </div>
     </div>
 
-    <div class="controls">
-        <button class="btn" id="prev-btn" disabled>السابقة</button>
-        <span class="page-num" id="page-info">صفحة 1 / 6</span>
-        <button class="btn" id="next-btn">التالية</button>
-    </div>
+    <div class="page-indicator" id="indicator">صفحة 1 / 6</div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // حساب الأبعاد تلقائياً لتكبير العرض على الهواتف
-            const screenWidth = window.innerWidth;
-            const screenHeight = window.innerHeight;
-            
-            const bookWidth = screenWidth > 500 ? 450 : Math.floor(screenWidth * 0.95);
-            const bookHeight = Math.floor(screenHeight * 0.78);
+        const pages = Array.from(document.querySelectorAll('.page'));
+        const totalPages = pages.length;
+        let currentPage = 0;
 
-            const pageFlip = new St.PageFlip(document.getElementById('book'), {
-                width: bookWidth,
-                height: bookHeight,
-                size: "fixed",
-                minWidth: 280,
-                maxWidth: 600,
-                minHeight: 400,
-                maxHeight: 900,
-                maxShadowOpacity: 0.7, // كثافة ظل انثناء الورقة
-                showCover: false,
-                mobileScrollSupport: false,
-                usePortrait: true, // صفحة واحدة كبيرة على الشاشة العمودية
-                flippingTime: 700
-            });
+        const indicator = document.getElementById('indicator');
+        const book = document.getElementById('book');
 
-            pageFlip.loadFromHTML(document.querySelectorAll('.my-page'));
+        let isDragging = false;
+        let startX = 0;
+        let currentAngle = 0;
+        let activePageIndex = 0;
+        let isFlippingNext = true;
 
-            const prevBtn = document.getElementById('prev-btn');
-            const nextBtn = document.getElementById('next-btn');
-            const pageInfo = document.getElementById('page-info');
+        function getX(e) {
+            return e.touches ? e.touches[0].clientX : e.clientX;
+        }
 
-            pageFlip.on('flip', (e) => {
-                pageInfo.innerText = `صفحة ${e.data + 1} / ${pageFlip.getPageCount()}`;
-                prevBtn.disabled = e.data === 0;
-                nextBtn.disabled = e.data === pageFlip.getPageCount() - 1;
-            });
+        function updateIndicator() {
+            indicator.innerText = `صفحة ${currentPage + 1} / ${totalPages}`;
+        }
 
-            prevBtn.addEventListener('click', () => pageFlip.flipPrev());
-            nextBtn.addEventListener('click', () => pageFlip.flipNext());
-        });
+        function handleStart(e) {
+            if (isDragging) return;
+            const x = getX(e);
+            const rect = book.getBoundingClientRect();
+            const touchX = x - rect.left;
+
+            // عند السحب من اليمين إلى اليسار (للنقل للصفحة التالية)
+            if (touchX > rect.width * 0.2 && currentPage < totalPages - 1) {
+                isDragging = true;
+                isFlippingNext = true;
+                activePageIndex = currentPage;
+                startX = x;
+                pages[activePageIndex].style.transition = 'none';
+            }
+            // عند السحب من اليسار إلى اليمين (للعودة للصفحة السابقة)
+            else if (touchX <= rect.width * 0.2 && currentPage > 0) {
+                isDragging = true;
+                isFlippingNext = false;
+                activePageIndex = currentPage - 1;
+                startX = x;
+                pages[activePageIndex].style.transition = 'none';
+                pages[activePageIndex].style.zIndex = totalPages + 10;
+            }
+        }
+
+        function handleMove(e) {
+            if (!isDragging) return;
+            const currentX = getX(e);
+            const deltaX = startX - currentX;
+            const bookWidth = book.offsetWidth;
+
+            if (isFlippingNext) {
+                let progress = deltaX / bookWidth;
+                progress = Math.max(0, Math.min(1, progress));
+                currentAngle = -180 * progress;
+
+                // محاكاة انثناء الورقة 3D مع السحب
+                const skew = Math.sin(progress * Math.PI) * 10;
+                pages[activePageIndex].style.transform = `rotateY(${currentAngle}deg) skewY(${skew}deg)`;
+
+                const shadow = pages[activePageIndex].querySelector('.page-shadow');
+                if (shadow) shadow.style.opacity = Math.sin(progress * Math.PI) * 0.8;
+            } else {
+                let progress = (currentX - startX) / bookWidth;
+                progress = Math.max(0, Math.min(1, progress));
+                currentAngle = -180 + (180 * progress);
+
+                const skew = -Math.sin(progress * Math.PI) * 10;
+                pages[activePageIndex].style.transform = `rotateY(${currentAngle}deg) skewY(${skew}deg)`;
+
+                const shadow = pages[activePageIndex].querySelector('.page-shadow');
+                if (shadow) shadow.style.opacity = Math.sin(progress * Math.PI) * 0.8;
+            }
+        }
+
+        function handleEnd() {
+            if (!isDragging) return;
+            isDragging = false;
+
+            const activePage = pages[activePageIndex];
+            activePage.style.transition = 'transform 0.4s cubic-bezier(0.25, 1, 0.5, 1)';
+
+            const shadow = activePage.querySelector('.page-shadow');
+            if (shadow) shadow.style.opacity = '0';
+
+            if (isFlippingNext) {
+                if (currentAngle < -50) {
+                    activePage.style.transform = 'rotateY(-180deg)';
+                    currentPage++;
+                } else {
+                    activePage.style.transform = 'rotateY(0deg)';
+                }
+            } else {
+                if (currentAngle > -130) {
+                    activePage.style.transform = 'rotateY(0deg)';
+                    currentPage--;
+                } else {
+                    activePage.style.transform = 'rotateY(-180deg)';
+                }
+            }
+
+            setTimeout(() => {
+                pages.forEach((p, i) => {
+                    p.style.transition = '';
+                    if (i < currentPage) {
+                        p.style.transform = 'rotateY(-180deg)';
+                        p.style.zIndex = i + 1;
+                    } else {
+                        p.style.transform = 'rotateY(0deg)';
+                        p.style.zIndex = totalPages - i;
+                    }
+                });
+                updateIndicator();
+            }, 400);
+        }
+
+        book.addEventListener('touchstart', handleStart, {passive: true});
+        window.addEventListener('touchmove', handleMove, {passive: true});
+        window.addEventListener('touchend', handleEnd);
+
+        book.addEventListener('mousedown', handleStart);
+        window.addEventListener('mousemove', handleMove);
+        window.addEventListener('mouseup', handleEnd);
+
+        updateIndicator();
     </script>
 </body>
 </html>
