@@ -5,8 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>البروشور التفاعلي</title>
 
-    <!-- مكتبة التقليب الـ 3D -->
-    <script src="https://cdn.jsdelivr.net/npm/page-flip@2.0.7/build/js/page-flip.browser.js"></script>
+    <!-- الرابط الرئيسي للمكتبة (unpkg) -->
+    <script src="https://unpkg.com/page-flip@2.0.7/build/js/page-flip.browser.js"></script>
+
+    <!-- الرابط الاحتياطي في حال حظر الرابط الأول -->
+    <script>
+        if (typeof St === 'undefined') {
+            document.write('<script src="https://cdn.jsdelivr.net/npm/page-flip@2.0.7/build/js/page-flip.browser.js"><\/script>');
+        }
+    </script>
 
     <style>
         * {
@@ -34,7 +41,6 @@
             padding: 20px 10px;
         }
 
-        /* إخفاء الحاوية تماماً لتجنب ظهور الصور فوق بعضها قبل تحويلها للتقليب */
         .flip-book {
             display: none;
             box-shadow: 0 10px 30px rgba(0,0,0,0.5);
@@ -82,25 +88,12 @@
             font-weight: bold;
             font-size: 15px;
         }
-
-        #error-log {
-            color: #ff6b6b;
-            background: rgba(0,0,0,0.8);
-            padding: 12px;
-            margin-top: 15px;
-            border-radius: 8px;
-            display: none;
-            font-size: 13px;
-            max-width: 90%;
-            text-align: center;
-        }
     </style>
 </head>
 <body>
 
     <div class="container">
         <div id="book" class="flip-book">
-            <!-- ضع صور البروشور هنا بالترتيب -->
             <div class="page"><img src="1.jpg" alt="غلاف البروشور"></div>
             <div class="page"><img src="2.jpg" alt="صفحة 2"></div>
             <div class="page"><img src="3.jpg" alt="صفحة 3"></div>
@@ -116,51 +109,38 @@
         <button class="btn" id="next-btn">التالية</button>
     </div>
 
-    <!-- مربع إظهار الأخطاء في حال فشل التحميل -->
-    <div id="error-log"></div>
-
     <script>
         window.addEventListener('load', function() {
-            const errorLog = document.getElementById('error-log');
-            
-            try {
-                if (typeof St === 'undefined' || !St.PageFlip) {
-                    throw new Error("تعذر تحميل مكتبة التقليب الـ 3D. تأكد من الاتصال بالإنترنت.");
-                }
-
-                const pageFlip = new St.PageFlip(
-                    document.getElementById('book'),
-                    {
-                        width: 360,        // عرض الصفحة
-                        height: 520,       // ارتفاع الصفحة
-                        size: 'fixed',     // نمط ثابت يمنع التفكك على الشاشات الصغار
-                        minWidth: 280,
-                        maxWidth: 450,
-                        minHeight: 400,
-                        maxHeight: 650,
-                        maxShadowOpacity: 0.5,
-                        showCover: true,
-                        mobileScrollSupport: false
-                    }
-                );
-
-                const pages = document.querySelectorAll('.page');
-                pageFlip.loadFromHTML(pages);
-
-                // إظهار البروشور فقط بعد نجاح المعالجة للتقليب
-                document.getElementById('book').style.display = 'block';
-
-                document.getElementById('next-btn').addEventListener('click', () => pageFlip.flipNext());
-                document.getElementById('prev-btn').addEventListener('click', () => pageFlip.flipPrev());
-
-                pageFlip.on('flip', (e) => {
-                    document.getElementById('page-info').innerText = `صفحة ${e.data + 1}`;
-                });
-
-            } catch (err) {
-                errorLog.style.display = 'block';
-                errorLog.innerText = 'تنبيه: ' + err.message;
+            if (typeof St === 'undefined' || !St.PageFlip) {
+                alert('تعذر تحميل المكتبة. يرجى إيقاف مانع الإعلانات (AdBlocker) إن وجد وإعادة التحديث.');
+                return;
             }
+
+            const pageFlip = new St.PageFlip(
+                document.getElementById('book'),
+                {
+                    width: 360,
+                    height: 520,
+                    size: 'fixed',
+                    minWidth: 280,
+                    maxWidth: 450,
+                    minHeight: 400,
+                    maxHeight: 650,
+                    maxShadowOpacity: 0.5,
+                    showCover: true,
+                    mobileScrollSupport: false
+                }
+            );
+
+            pageFlip.loadFromHTML(document.querySelectorAll('.page'));
+            document.getElementById('book').style.display = 'block';
+
+            document.getElementById('next-btn').addEventListener('click', () => pageFlip.flipNext());
+            document.getElementById('prev-btn').addEventListener('click', () => pageFlip.flipPrev());
+
+            pageFlip.on('flip', (e) => {
+                document.getElementById('page-info').innerText = `صفحة ${e.data + 1}`;
+            });
         });
     </script>
 </body>
