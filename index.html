@@ -14,43 +14,45 @@
         html, body {
             width: 100%;
             height: 100%;
+            margin: 0;
+            padding: 0;
             overflow: hidden;
             background-color: #000000;
             position: fixed;
             top: 0;
             left: 0;
+            right: 0;
+            bottom: 0;
             touch-action: none;
             user-select: none;
             -webkit-user-select: none;
         }
 
-        #viewport {
+        .container {
             width: 100vw;
             height: 100vh;
             height: 100dvh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+
+        #book {
+            width: 100% !important;
+            height: 100% !important;
+        }
+
+        .page {
+            width: 100% !important;
+            height: 100% !important;
             background-color: #000000;
+            overflow: hidden;
         }
 
-        #flipbook {
-            width: 100vw;
-            height: 100vh;
-            height: 100dvh;
-        }
-
-        #flipbook .page {
-            width: 100vw;
-            height: 100vh;
-            height: 100dvh;
-            background-color: #000000;
-        }
-
-        #flipbook img {
-            width: 100%;
-            height: 100%;
-            object-fit: fill;
+        .page img {
+            width: 100% !important;
+            height: 100% !important;
+            object-fit: fill !important;
             display: block;
             pointer-events: none;
         }
@@ -58,67 +60,67 @@
 </head>
 <body>
 
-    <div id="viewport">
-        <div id="flipbook">
-            <!-- ترتيب الصفحات الطبيعي من 1 إلى 6 -->
-            <div class="page"><img src="1.jpg" alt="1"></div>
-            <div class="page"><img src="2.jpg" alt="2"></div>
-            <div class="page"><img src="3.jpg" alt="3"></div>
-            <div class="page"><img src="4.jpg" alt="4"></div>
-            <div class="page"><img src="5.jpg" alt="5"></div>
+    <div class="container">
+        <div id="book">
             <div class="page"><img src="6.jpg" alt="6"></div>
+            <div class="page"><img src="5.jpg" alt="5"></div>
+            <div class="page"><img src="4.jpg" alt="4"></div>
+            <div class="page"><img src="3.jpg" alt="3"></div>
+            <div class="page"><img src="2.jpg" alt="2"></div>
+            <div class="page"><img src="1.jpg" alt="1"></div>
         </div>
     </div>
 
-    <!-- مكتبات Turn.js للانثناء الورقي الحقيقي -->
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/turn.js/4.1.0/turn.min.js"></script>
+    <!-- محرك انثناء الورق 3D الحديث والمستقر -->
+    <script src="https://cdn.jsdelivr.net/npm/page-flip@2.0.7/dist/js/page-flip.browser.js"></script>
     <script>
-        $(document).ready(function() {
-            var $book = $('#flipbook');
-            var winWidth = $(window).width();
-            var winHeight = $(window).height();
+        document.addEventListener('DOMContentLoaded', function() {
+            const bookElem = document.getElementById('book');
 
-            // تهيئة محرك Turn.js للانثناء الورقي العربي
-            $book.turn({
-                width: winWidth,
-                height: winHeight,
-                autoCenter: true,
-                display: 'single',
-                direction: 'rtl',     /* نظام القراءة العربي */
-                duration: 800,        /* سرعة انثناء الورقة */
-                gradients: true,      /* إظهار ظلال الانحناء والتجعد الورقي */
-                elevation: 50,        /* ارتفاع الورقة 3D أثناء التقليب */
-                acceleration: true
+            const pageFlip = new St.PageFlip(bookElem, {
+                width: window.innerWidth,
+                height: window.innerHeight,
+                size: "stretch",
+                minWidth: 200,
+                maxWidth: 2500,
+                minHeight: 300,
+                maxHeight: 2500,
+                maxShadowOpacity: 0.7,
+                showCover: false,
+                usePortrait: true,
+                startPage: 5, /* الصفحة الأولى 1.jpg */
+                mobileScrollSupport: false,
+                flippingTime: 650,
+                useMouseEvents: false, /* إيقاف سحب الحواف الافتراضي لمنع التجمّد */
+                clickEventForward: false
             });
 
-            // ضبط الأبعاد تلقائياً عند تدوير الشاشة
-            $(window).resize(function() {
-                $book.turn('size', $(window).width(), $(window).height());
-            });
+            const pages = document.querySelectorAll('.page');
+            pageFlip.loadFromHTML(pages);
 
-            // حسّاس السحب باللمس للتقليب المرن
+            // حساس لمس مباشر وسريع بدون تعارض
             let startX = 0;
             let startY = 0;
 
-            document.addEventListener('touchstart', function(e) {
+            window.addEventListener('touchstart', function(e) {
                 startX = e.touches[0].clientX;
                 startY = e.touches[0].clientY;
             }, { passive: true });
 
-            document.addEventListener('touchend', function(e) {
+            window.addEventListener('touchend', function(e) {
                 let endX = e.changedTouches[0].clientX;
                 let endY = e.changedTouches[0].clientY;
                 let diffX = endX - startX;
                 let diffY = endY - startY;
 
-                if (Math.abs(diffX) > 30 && Math.abs(diffX) > Math.abs(diffY)) {
+                // التثبت من السحب الأفقي
+                if (Math.abs(diffX) > 35 && Math.abs(diffX) > Math.abs(diffY)) {
                     if (diffX > 0) {
-                        // سحب من اليسار إلى اليمين -> الصفحة التالية بالترتيب العربي
-                        $book.turn('next');
+                        // سحب من اليسار إلى اليمين -> الصفحة التالية بالترتيب (1 -> 2 -> 3)
+                        pageFlip.flipPrev('top-left');
                     } else {
                         // سحب من اليمين إلى اليسار -> العودة للصفحة السابقة
-                        $book.turn('previous');
+                        pageFlip.flipNext('top-right');
                     }
                 }
             }, { passive: true });
