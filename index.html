@@ -37,9 +37,11 @@
             left: 0;
         }
 
+        /* عكس حاوية الكتاب أفقياً لتفعيل انثناء الورق الـ 3D من اليسار */
         #book {
             width: 100% !important;
             height: 100% !important;
+            transform: scaleX(-1);
         }
 
         .page {
@@ -49,12 +51,14 @@
             overflow: hidden;
         }
 
+        /* إعادة تعديل الصورة لكي لا تظهر معكوسة */
         .page img {
             width: 100% !important;
             height: 100% !important;
             object-fit: fill !important;
             display: block;
             pointer-events: none;
+            transform: scaleX(-1);
         }
     </style>
 </head>
@@ -62,7 +66,7 @@
 
     <div class="container">
         <div id="book">
-            <!-- الترتيب الطبيعي للصفحات -->
+            <!-- الترتيب التسلسلي الطبيعي -->
             <div class="page"><img src="1.jpg" alt="1"></div>
             <div class="page"><img src="2.jpg" alt="2"></div>
             <div class="page"><img src="3.jpg" alt="3"></div>
@@ -86,7 +90,7 @@
                 maxWidth: 2500,
                 minHeight: 300,
                 maxHeight: 2500,
-                maxShadowOpacity: 0.8,
+                maxShadowOpacity: 0.85,
                 showCover: false,
                 usePortrait: true,
                 startPage: 0,
@@ -115,11 +119,11 @@
 
                 if (Math.abs(diffX) > 30 && Math.abs(diffX) > Math.abs(diffY)) {
                     if (diffX > 0) {
-                        // سحب من اليسار إلى اليمين -> التقليب للصفحة التالية (عربي) بانثناء ورقي 3D من اليسار
-                        pageFlip.flipNext('bottom-left');
+                        // سحب من اليسار لليمين -> تقليب مرن للورقة التالية بخصائص الـ 3D الكاملة
+                        pageFlip.flipNext('top-right');
                     } else {
-                        // سحب من اليمين إلى اليسار -> العودة للصفحة السابقة
-                        pageFlip.flipPrev('bottom-right');
+                        // سحب من اليمين للربط بالصفحة السابقة
+                        pageFlip.flipPrev('top-left');
                     }
                 }
             }, { passive: true });
