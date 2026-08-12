@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>البروشور التفاعلي العربي - تقليب احترافي</title>
+    <title>البروشور التفاعلي العربي</title>
     <style>
         * {
             box-sizing: border-box;
@@ -17,7 +17,7 @@
             margin: 0;
             padding: 0;
             overflow: hidden;
-            background: #0a0a0a;
+            background-color: #000000;
             position: fixed;
             top: 0;
             left: 0;
@@ -26,586 +26,102 @@
             touch-action: none;
             user-select: none;
             -webkit-user-select: none;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
 
-        /* حاوية رئيسية */
-        .book-container {
+        .container {
             width: 100vw;
             height: 100vh;
             height: 100dvh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            perspective: 2000px;
-            background: radial-gradient(ellipse at center, #1a1a2e 0%, #0a0a0a 100%);
-        }
-
-        .book-wrapper {
-            width: 95%;
-            max-width: 1200px;
-            height: 92vh;
-            max-height: 800px;
-            position: relative;
-            transform-style: preserve-3d;
-        }
-
-        /* الكتاب */
-        .book {
-            width: 100%;
-            height: 100%;
-            position: relative;
-            transform-style: preserve-3d;
-            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.8);
-            border-radius: 12px;
-        }
-
-        /* كل صفحة */
-        .page {
             position: absolute;
-            width: 50%;
-            height: 100%;
             top: 0;
-            right: 0;
-            background: #ffffff;
-            border-radius: 0 12px 12px 0;
-            transform-origin: right center;
-            transform-style: preserve-3d;
-            backface-visibility: hidden;
-            transition: transform 0.9s cubic-bezier(0.645, 0.045, 0.355, 1);
-            padding: 0;
+            left: 0;
+        }
+
+        #book {
+            width: 100% !important;
+            height: 100% !important;
+            transform: scaleX(-1);
+        }
+
+        .page {
+            width: 100% !important;
+            height: 100% !important;
+            background-color: #000000;
             overflow: hidden;
-            box-shadow: 0 0 30px rgba(0, 0, 0, 0.15);
-            border: 1px solid rgba(255, 255, 255, 0.05);
         }
 
         .page img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
+            width: 100% !important;
+            height: 100% !important;
+            object-fit: fill !important;
             display: block;
             pointer-events: none;
-        }
-
-        /* الوجه الخلفي للصفحة */
-        .page-back {
-            transform: rotateY(-180deg);
-            border-radius: 12px 0 0 12px;
-            right: auto;
-            left: 0;
-            transform-origin: left center;
-            background: #f8f8f8;
-        }
-
-        /* الصفحة المقلوبة */
-        .page.flipped {
-            transform: rotateY(-180deg);
-        }
-
-        .page.flipped .page-back {
-            transform: rotateY(0deg);
-        }
-
-        /* تأثير الظل أثناء التقليب */
-        .page::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            right: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(to left, rgba(0, 0, 0, 0.08), transparent 30%, transparent 70%, rgba(0, 0, 0, 0.03));
-            pointer-events: none;
-            z-index: 2;
-            border-radius: inherit;
-        }
-
-        .page-back::before {
-            background: linear-gradient(to right, rgba(0, 0, 0, 0.08), transparent 30%, transparent 70%, rgba(0, 0, 0, 0.03));
-        }
-
-        /* ظل إضافي واقعي */
-        .page::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            box-shadow: inset 0 0 50px rgba(0, 0, 0, 0.05);
-            pointer-events: none;
-            z-index: 3;
-            border-radius: inherit;
-        }
-
-        /* أزرار التحكم */
-        .controls {
-            position: fixed;
-            bottom: 40px;
-            left: 50%;
-            transform: translateX(-50%);
-            display: flex;
-            gap: 20px;
-            z-index: 100;
-            background: rgba(0, 0, 0, 0.5);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            padding: 12px 25px;
-            border-radius: 60px;
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
-        }
-
-        .controls button {
-            padding: 12px 30px;
-            font-size: 16px;
-            font-weight: 600;
-            border: none;
-            border-radius: 40px;
-            background: linear-gradient(135deg, #6c5ce7, #a29bfe);
-            color: white;
-            cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            box-shadow: 0 4px 15px rgba(108, 92, 231, 0.3);
-            letter-spacing: 0.5px;
-            min-width: 110px;
-            touch-action: none;
-        }
-
-        .controls button:hover:not(:disabled) {
-            transform: translateY(-3px) scale(1.02);
-            box-shadow: 0 8px 25px rgba(108, 92, 231, 0.5);
-        }
-
-        .controls button:active:not(:disabled) {
-            transform: scale(0.95);
-        }
-
-        .controls button:disabled {
-            background: rgba(255, 255, 255, 0.1);
-            color: rgba(255, 255, 255, 0.3);
-            cursor: not-allowed;
-            box-shadow: none;
-            transform: none;
-        }
-
-        .controls button:first-child {
-            background: linear-gradient(135deg, #fd79a8, #e17055);
-            box-shadow: 0 4px 15px rgba(225, 112, 85, 0.3);
-        }
-
-        .controls button:first-child:hover:not(:disabled) {
-            box-shadow: 0 8px 25px rgba(225, 112, 85, 0.5);
-        }
-
-        /* مؤشر الصفحات */
-        .page-indicator {
-            position: fixed;
-            top: 30px;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 100;
-            background: rgba(0, 0, 0, 0.4);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            padding: 8px 28px;
-            border-radius: 50px;
-            color: rgba(255, 255, 255, 0.9);
-            font-size: 15px;
-            font-weight: 500;
-            letter-spacing: 1px;
-            border: 1px solid rgba(255, 255, 255, 0.06);
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-        }
-
-        /* زر القائمة */
-        .menu-btn {
-            position: fixed;
-            top: 30px;
-            right: 30px;
-            z-index: 100;
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            color: rgba(255, 255, 255, 0.7);
-            width: 45px;
-            height: 45px;
-            border-radius: 50%;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 20px;
-            transition: all 0.3s ease;
-            touch-action: none;
-        }
-
-        .menu-btn:hover {
-            background: rgba(255, 255, 255, 0.1);
-            transform: scale(1.05);
-        }
-
-        /* شاشة التحميل */
-        .loading-screen {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: #0a0a0a;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            z-index: 999;
-            transition: opacity 0.8s ease, visibility 0.8s ease;
-        }
-
-        .loading-screen.hidden {
-            opacity: 0;
-            visibility: hidden;
-        }
-
-        .loader {
-            width: 60px;
-            height: 60px;
-            border: 3px solid rgba(255, 255, 255, 0.05);
-            border-top: 3px solid #6c5ce7;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin-bottom: 25px;
-        }
-
-        .loading-screen span {
-            color: rgba(255, 255, 255, 0.4);
-            font-size: 14px;
-            letter-spacing: 2px;
-        }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
-        /* استجابة للشاشات الصغيرة */
-        @media (max-width: 768px) {
-            .book-wrapper {
-                width: 98%;
-                height: 88vh;
-                max-height: none;
-            }
-
-            .controls {
-                bottom: 25px;
-                padding: 10px 15px;
-                gap: 12px;
-            }
-
-            .controls button {
-                padding: 10px 20px;
-                font-size: 14px;
-                min-width: 85px;
-            }
-
-            .page-indicator {
-                top: 20px;
-                padding: 6px 18px;
-                font-size: 13px;
-            }
-
-            .menu-btn {
-                top: 20px;
-                right: 20px;
-                width: 38px;
-                height: 38px;
-                font-size: 16px;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .controls button {
-                padding: 8px 14px;
-                font-size: 12px;
-                min-width: 65px;
-            }
-
-            .controls {
-                gap: 8px;
-                padding: 8px 12px;
-            }
-
-            .page-indicator {
-                font-size: 11px;
-                padding: 4px 14px;
-                top: 15px;
-            }
-        }
-
-        /* تأثيرات إضافية للجمال */
-        .glow {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 600px;
-            height: 600px;
-            background: radial-gradient(circle, rgba(108, 92, 231, 0.03) 0%, transparent 70%);
-            pointer-events: none;
-            z-index: 0;
-            border-radius: 50%;
+            transform: scaleX(-1);
         }
     </style>
 </head>
 <body>
 
-    <!-- شاشة تحميل -->
-    <div class="loading-screen" id="loadingScreen">
-        <div class="loader"></div>
-        <span>جاري تحميل البروشور...</span>
-    </div>
-
-    <!-- تأثير إضاءة -->
-    <div class="glow"></div>
-
-    <!-- الكتاب -->
-    <div class="book-container">
-        <div class="book-wrapper">
-            <div class="book" id="book">
-
-                <!-- الصفحة 1 -->
-                <div class="page" data-page="0" style="z-index:12;">
-                    <img src="1.jpg" alt="الصفحة 1" loading="eager">
-                </div>
-
-                <!-- الصفحة 2 (ظهر الصفحة 1) -->
-                <div class="page page-back" data-page="1" style="z-index:11;">
-                    <img src="2.jpg" alt="الصفحة 2" loading="eager">
-                </div>
-
-                <!-- الصفحة 3 -->
-                <div class="page" data-page="2" style="z-index:10;">
-                    <img src="3.jpg" alt="الصفحة 3" loading="eager">
-                </div>
-
-                <!-- الصفحة 4 (ظهر الصفحة 3) -->
-                <div class="page page-back" data-page="3" style="z-index:9;">
-                    <img src="4.jpg" alt="الصفحة 4" loading="eager">
-                </div>
-
-                <!-- الصفحة 5 -->
-                <div class="page" data-page="4" style="z-index:8;">
-                    <img src="5.jpg" alt="الصفحة 5" loading="eager">
-                </div>
-
-                <!-- الصفحة 6 (ظهر الصفحة 5) -->
-                <div class="page page-back" data-page="5" style="z-index:7;">
-                    <img src="6.jpg" alt="الصفحة 6" loading="eager">
-                </div>
-
-            </div>
+    <div class="container">
+        <div id="book">
+            <div class="page"><img src="1.jpg" alt="1"></div>
+            <div class="page"><img src="2.jpg" alt="2"></div>
+            <div class="page"><img src="3.jpg" alt="3"></div>
+            <div class="page"><img src="4.jpg" alt="4"></div>
+            <div class="page"><img src="5.jpg" alt="5"></div>
+            <div class="page"><img src="6.jpg" alt="6"></div>
         </div>
     </div>
 
-    <!-- مؤشر الصفحات -->
-    <div class="page-indicator" id="indicator">1 / 6</div>
-
-    <!-- أزرار التحكم -->
-    <div class="controls">
-        <button id="prevBtn">➜ السابق</button>
-        <button id="nextBtn">التالي ➜</button>
-    </div>
-
+    <script src="https://cdn.jsdelivr.net/npm/page-flip@2.0.7/dist/js/page-flip.browser.js"></script>
     <script>
-        (function() {
-            'use strict';
+        document.addEventListener('DOMContentLoaded', function() {
+            const bookElem = document.getElementById('book');
 
-            const book = document.getElementById('book');
-            const pages = document.querySelectorAll('.page');
-            const prevBtn = document.getElementById('prevBtn');
-            const nextBtn = document.getElementById('nextBtn');
-            const indicator = document.getElementById('indicator');
-            const loadingScreen = document.getElementById('loadingScreen');
-
-            let currentPage = 0;
-            const totalPages = pages.length;
-            let isFlipping = false;
-
-            // تهيئة الصفحات
-            function initPages() {
-                pages.forEach((page, index) => {
-                    page.classList.remove('flipped');
-                    page.style.zIndex = totalPages - index;
-                });
-                updateUI();
-            }
-
-            // تحديث واجهة المستخدم
-            function updateUI() {
-                // تحديث الأزرار
-                prevBtn.disabled = currentPage === 0;
-                nextBtn.disabled = currentPage >= totalPages - 2;
-
-                // تحديث المؤشر
-                indicator.textContent = `${currentPage + 1} / ${totalPages}`;
-
-                // تحديث حالة الصفحات
-                pages.forEach((page, index) => {
-                    if (index <= currentPage) {
-                        page.classList.add('flipped');
-                    } else {
-                        page.classList.remove('flipped');
-                    }
-                });
-            }
-
-            // التقليب للصفحة التالية
-            function flipNext() {
-                if (isFlipping || currentPage >= totalPages - 2) return;
-                isFlipping = true;
-                currentPage++;
-                updateUI();
-                setTimeout(() => {
-                    isFlipping = false;
-                }, 950);
-            }
-
-            // التقليب للصفحة السابقة
-            function flipPrev() {
-                if (isFlipping || currentPage <= 0) return;
-                isFlipping = true;
-                currentPage--;
-                updateUI();
-                setTimeout(() => {
-                    isFlipping = false;
-                }, 950);
-            }
-
-            // أحداث الأزرار
-            prevBtn.addEventListener('click', flipPrev);
-            nextBtn.addEventListener('click', flipNext);
-
-            // دعم لوحة المفاتيح
-            document.addEventListener('keydown', function(e) {
-                if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
-                    e.preventDefault();
-                    flipNext();
-                } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
-                    e.preventDefault();
-                    flipPrev();
-                }
+            const pageFlip = new St.PageFlip(bookElem, {
+                width: window.innerWidth,
+                height: window.innerHeight,
+                size: "stretch",
+                minWidth: 200,
+                maxWidth: 2500,
+                minHeight: 300,
+                maxHeight: 2500,
+                maxShadowOpacity: 0.85,
+                showCover: false,
+                usePortrait: true,
+                startPage: 0,
+                mobileScrollSupport: false,
+                flippingTime: 700,
+                useMouseEvents: false,
+                clickEventForward: false
             });
 
-            // دعم السحب بالماوس
-            let isDragging = false;
+            const pages = document.querySelectorAll('.page');
+            pageFlip.loadFromHTML(pages);
+
             let startX = 0;
             let startY = 0;
 
-            book.addEventListener('mousedown', function(e) {
-                isDragging = true;
-                startX = e.clientX;
-                startY = e.clientY;
-                e.preventDefault();
-            });
-
-            document.addEventListener('mousemove', function(e) {
-                if (!isDragging) return;
-                const diffX = e.clientX - startX;
-                const diffY = e.clientY - startY;
-                if (Math.abs(diffX) > 30 && Math.abs(diffX) > Math.abs(diffY) * 1.2) {
-                    if (diffX > 0) {
-                        flipNext();
-                    } else {
-                        flipPrev();
-                    }
-                    isDragging = false;
-                }
-            });
-
-            document.addEventListener('mouseup', function() {
-                isDragging = false;
-            });
-
-            // دعم اللمس
-            let touchStartX = 0;
-            let touchStartY = 0;
-
-            book.addEventListener('touchstart', function(e) {
-                const touch = e.touches[0];
-                touchStartX = touch.clientX;
-                touchStartY = touch.clientY;
+            window.addEventListener('touchstart', function(e) {
+                startX = e.touches[0].clientX;
+                startY = e.touches[0].clientY;
             }, { passive: true });
 
-            book.addEventListener('touchend', function(e) {
-                const endX = e.changedTouches[0].clientX;
-                const endY = e.changedTouches[0].clientY;
-                const diffX = endX - touchStartX;
-                const diffY = endY - touchStartY;
+            window.addEventListener('touchend', function(e) {
+                let endX = e.changedTouches[0].clientX;
+                let endY = e.changedTouches[0].clientY;
+                let diffX = endX - startX;
+                let diffY = endY - startY;
 
-                if (Math.abs(diffX) > 40 && Math.abs(diffX) > Math.abs(diffY) * 1.2) {
+                if (Math.abs(diffX) > 40 && Math.abs(diffX) > Math.abs(diffY)) {
                     if (diffX > 0) {
-                        flipNext();
+                        pageFlip.flipNext('top-right');
                     } else {
-                        flipPrev();
+                        pageFlip.flipPrev('top-left');
                     }
                 }
             }, { passive: true });
-
-            // إخفاء شاشة التحميل
-            function hideLoading() {
-                loadingScreen.classList.add('hidden');
-            }
-
-            // تحميل الصور ثم إخفاء شاشة التحميل
-            const images = document.querySelectorAll('.page img');
-            let loadedImages = 0;
-
-            if (images.length === 0) {
-                hideLoading();
-            } else {
-                images.forEach(function(img) {
-                    if (img.complete) {
-                        loadedImages++;
-                    } else {
-                        img.addEventListener('load', function() {
-                            loadedImages++;
-                            if (loadedImages === images.length) {
-                                setTimeout(hideLoading, 300);
-                            }
-                        });
-                        img.addEventListener('error', function() {
-                            loadedImages++;
-                            if (loadedImages === images.length) {
-                                setTimeout(hideLoading, 300);
-                            }
-                        });
-                    }
-                });
-
-                // إذا كانت الصور محملة بالفعل
-                if (loadedImages === images.length) {
-                    setTimeout(hideLoading, 300);
-                }
-
-                // تأمين: إخفاء التحميل بعد 5 ثواني كحد أقصى
-                setTimeout(hideLoading, 5000);
-            }
-
-            // تهيئة الكتاب
-            initPages();
-
-            // معالجة تغيير حجم الشاشة
-            let resizeTimer;
-            window.addEventListener('resize', function() {
-                clearTimeout(resizeTimer);
-                resizeTimer = setTimeout(function() {
-                    // إعادة ضبط أي شيء يحتاج إلى تحديث
-                }, 250);
-            });
-
-            console.log('✅ بروشور تقليب احترافي - يعمل بنجاح!');
-            console.log(`📄 عدد الصفحات: ${totalPages}`);
-
-        })();
+        });
     </script>
-
 </body>
 </html>
