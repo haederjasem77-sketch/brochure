@@ -4,112 +4,192 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>البروشور التفاعلي</title>
-
-    <!-- سيرفر Cloudflare العالمي السريع جداً -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/page-flip/2.0.7/page-flip.browser.js"></script>
-
-    <!-- احتياطي: الملف المحلي المرفوع بحسابك -->
-    <script>
-        if (typeof St === 'undefined') {
-            document.write('<script src="page-flip.browser.js"><\/script>');
-        }
-    </script>
-
     <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
         body {
-            background-color: #1e293b;
+            background-color: #0f172a;
+            color: #ffffff;
+            font-family: system-ui, -apple-system, sans-serif;
+            min-height: 100vh;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            min-height: 100vh;
-            font-family: system-ui, -apple-system, sans-serif;
             overflow-x: hidden;
         }
+
         .container {
             width: 100%;
             display: flex;
             justify-content: center;
             align-items: center;
             padding: 20px 10px;
+            perspective: 1500px;
         }
-        .flip-book {
-            display: none;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+
+        .book {
+            position: relative;
+            width: 350px;
+            height: 520px;
+            transform-style: preserve-3d;
+            transition: transform 0.5s ease;
         }
-        .page { background-color: #ffffff; overflow: hidden; }
-        .page img { width: 100%; height: 100%; object-fit: fill; display: block; }
+
+        .page {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            transform-origin: left center;
+            transform-style: preserve-3d;
+            transition: transform 0.8s cubic-bezier(0.25, 1, 0.5, 1);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5);
+            border-radius: 0 8px 8px 0;
+            background: #ffffff;
+            overflow: hidden;
+            backface-visibility: hidden;
+        }
+
+        .page img {
+            width: 100%;
+            height: 100%;
+            object-fit: fill;
+            display: block;
+            user-select: none;
+            -webkit-user-drag: none;
+        }
+
+        /* تأثير تقليب الصفحة 3D */
+        .page.flipped {
+            transform: rotateY(-180deg);
+        }
+
         .controls {
-            margin-top: 20px;
+            margin-top: 25px;
             display: flex;
             gap: 15px;
             align-items: center;
             z-index: 100;
         }
+
         .btn {
             background-color: #ffffff;
             color: #0f172a;
             border: none;
-            padding: 10px 22px;
+            padding: 10px 24px;
             font-size: 15px;
             font-weight: bold;
             border-radius: 20px;
             cursor: pointer;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            transition: all 0.2s ease;
         }
-        .btn:active { transform: scale(0.95); }
-        .page-num { color: #ffffff; font-weight: bold; font-size: 15px; }
+
+        .btn:hover:not(:disabled) {
+            background-color: #e2e8f0;
+        }
+
+        .btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        .btn:active:not(:disabled) {
+            transform: scale(0.95);
+        }
+
+        .page-num {
+            color: #ffffff;
+            font-weight: bold;
+            font-size: 15px;
+            min-width: 100px;
+            text-align: center;
+        }
     </style>
 </head>
 <body>
 
     <div class="container">
-        <div id="book" class="flip-book">
-            <div class="page"><img src="1.jpg" alt="غلاف البروشور"></div>
-            <div class="page"><img src="2.jpg" alt="صفحة 2"></div>
-            <div class="page"><img src="3.jpg" alt="صفحة 3"></div>
-            <div class="page"><img src="4.jpg" alt="صفحة 4"></div>
-            <div class="page"><img src="5.jpg" alt="صفحة 5"></div>
-            <div class="page"><img src="6.jpg" alt="الغلاف الخلفي"></div>
+        <div class="book" id="book">
+            <!-- صفحات البروشور بالترتيب من 1 إلى 6 -->
+            <div class="page" style="z-index: 6;"><img src="1.jpg" alt="غلاف البروشور"></div>
+            <div class="page" style="z-index: 5;"><img src="2.jpg" alt="صفحة 2"></div>
+            <div class="page" style="z-index: 4;"><img src="3.jpg" alt="صفحة 3"></div>
+            <div class="page" style="z-index: 3;"><img src="4.jpg" alt="صفحة 4"></div>
+            <div class="page" style="z-index: 2;"><img src="5.jpg" alt="صفحة 5"></div>
+            <div class="page" style="z-index: 1;"><img src="6.jpg" alt="الغلاف الخلفي"></div>
         </div>
     </div>
 
     <div class="controls">
-        <button class="btn" id="prev-btn">السابقة</button>
-        <span class="page-num" id="page-info">صفحة 1</span>
+        <button class="btn" id="prev-btn" disabled>السابقة</button>
+        <span class="page-num" id="page-info">صفحة 1 / 6</span>
         <button class="btn" id="next-btn">التالية</button>
     </div>
 
     <script>
-        window.addEventListener('load', function() {
-            if (typeof St === 'undefined' || !St.PageFlip) {
-                alert('تعذر تحميل المكتبة. يرجى إعادة تحديث الصفحة.');
-                return;
-            }
+        const pages = document.querySelectorAll('.page');
+        const totalPages = pages.length;
+        let currentPage = 0;
 
-            const pageFlip = new St.PageFlip(
-                document.getElementById('book'),
-                {
-                    width: 360,
-                    height: 520,
-                    size: 'fixed',
-                    maxShadowOpacity: 0.5,
-                    showCover: true,
-                    mobileScrollSupport: false
+        const prevBtn = document.getElementById('prev-btn');
+        const nextBtn = document.getElementById('next-btn');
+        const pageInfo = document.getElementById('page-info');
+
+        function updateBook() {
+            pages.forEach((page, index) => {
+                if (index < currentPage) {
+                    page.classList.add('flipped');
+                    page.style.zIndex = index + 1;
+                } else {
+                    page.classList.remove('flipped');
+                    page.style.zIndex = totalPages - index;
                 }
-            );
-
-            pageFlip.loadFromHTML(document.querySelectorAll('.page'));
-            document.getElementById('book').style.display = 'block';
-
-            document.getElementById('next-btn').addEventListener('click', () => pageFlip.flipNext());
-            document.getElementById('prev-btn').addEventListener('click', () => pageFlip.flipPrev());
-
-            pageFlip.on('flip', (e) => {
-                document.getElementById('page-info').innerText = `صفحة ${e.data + 1}`;
             });
+
+            pageInfo.innerText = `صفحة ${currentPage + 1} / ${totalPages}`;
+            prevBtn.disabled = currentPage === 0;
+            nextBtn.disabled = currentPage === totalPages - 1;
+        }
+
+        nextBtn.addEventListener('click', () => {
+            if (currentPage < totalPages - 1) {
+                currentPage++;
+                updateBook();
+            }
         });
+
+        prevBtn.addEventListener('click', () => {
+            if (currentPage > 0) {
+                currentPage--;
+                updateBook();
+            }
+        });
+
+        // دعم التمرير باللمس على أجهزة الموبايل
+        let startX = 0;
+        const bookElement = document.getElementById('book');
+
+        bookElement.addEventListener('touchstart', (e) => {
+            startX = e.touches[0].clientX;
+        });
+
+        bookElement.addEventListener('touchend', (e) => {
+            let endX = e.changedTouches[0].clientX;
+            if (startX - endX > 40) {
+                if (currentPage < totalPages - 1) { currentPage++; updateBook(); }
+            } else if (endX - startX > 40) {
+                if (currentPage > 0) { currentPage--; updateBook(); }
+            }
+        });
+
+        updateBook();
     </script>
 </body>
 </html>
