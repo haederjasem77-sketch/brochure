@@ -2,7 +2,7 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>البروشور التفاعلي</title>
     <style>
         * {
@@ -14,40 +14,49 @@
         html, body {
             width: 100%;
             height: 100%;
-            background-color: #0f172a;
+            margin: 0;
+            padding: 0;
             overflow: hidden;
+            background-color: #000000;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
             touch-action: none;
             user-select: none;
             -webkit-user-select: none;
         }
 
-        /* الحاوية تغطي كامل مساحة الشاشة بالظبط */
+        /* حاوية تغطي الشاشة بالكامل 100% */
         .container {
             width: 100vw;
             height: 100vh;
             height: 100dvh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
         }
 
         #book {
-            width: 100%;
-            height: 100%;
+            width: 100% !important;
+            height: 100% !important;
         }
 
         .my-page {
-            background-color: #0f172a;
-            width: 100%;
-            height: 100%;
+            width: 100% !important;
+            height: 100% !important;
+            background-color: #000000;
             overflow: hidden;
         }
 
-        /* object-fit: contain تضمن عرض الصورة كاملة 100% دون اقتطاع أي حافة */
+        /* تجعل الصورة تملأ كامل الشاشة بدون أي فراغات أو حواف */
         .my-page img {
-            width: 100%;
-            height: 100%;
-            object-fit: contain;
+            width: 100% !important;
+            height: 100% !important;
+            object-fit: fill !important;
             display: block;
             pointer-events: none;
         }
@@ -66,28 +75,61 @@
         </div>
     </div>
 
-    <!-- محرك انثناء الورق الـ 3D باللمس -->
     <script src="https://cdn.jsdelivr.net/npm/page-flip@2.0.7/dist/js/page-flip.browser.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            const pageFlip = new St.PageFlip(document.getElementById('book'), {
-                width: window.innerWidth,
-                height: window.innerHeight,
+            const bookElem = document.getElementById('book');
+            const width = window.innerWidth;
+            const height = window.innerHeight;
+
+            const pageFlip = new St.PageFlip(bookElem, {
+                width: width,
+                height: height,
                 size: "stretch",
                 minWidth: 200,
-                maxWidth: 2000,
+                maxWidth: 2500,
                 minHeight: 300,
-                maxHeight: 3000,
-                maxShadowOpacity: 0.6,
+                maxHeight: 2500,
+                maxShadowOpacity: 0.4,
                 showCover: false,
                 usePortrait: true,
-                startPage: 5,
+                startPage: 5, /* الصفحة الأولى */
                 mobileScrollSupport: false,
-                flippingTime: 600
+                flippingTime: 500, /* سرعة وسلاسة انثناء الورقة */
+                useMouseEvents: true,
+                swipeDistance: 15,
+                clickEventForward: true
             });
 
             const pages = document.querySelectorAll('.my-page');
             pageFlip.loadFromHTML(pages);
+
+            // حساس لمس ذكي لضمان سلاسة السحب في أي مكان على الشاشة
+            let startX = 0;
+            let startY = 0;
+
+            window.addEventListener('touchstart', function(e) {
+                startX = e.touches[0].clientX;
+                startY = e.touches[0].clientY;
+            }, { passive: true });
+
+            window.addEventListener('touchend', function(e) {
+                const endX = e.changedTouches[0].clientX;
+                const endY = e.changedTouches[0].clientY;
+                const diffX = endX - startX;
+                const diffY = endY - startY;
+
+                // التاكد من أن السحب أفقياً
+                if (Math.abs(diffX) > 35 && Math.abs(diffX) > Math.abs(diffY)) {
+                    if (diffX > 0) {
+                        // سحب من اليسار إلى اليمين -> انتقل للصفحة التالية بانثناء الورقة
+                        pageFlip.flipPrev('top-left');
+                    } else {
+                        // سحب من اليمين إلى اليسار -> عودة للصفحة السابقة بانثناء الورقة
+                        pageFlip.flipNext('top-right');
+                    }
+                }
+            }, { passive: true });
         });
     </script>
 </body>
