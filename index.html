@@ -14,7 +14,7 @@
         html, body {
             width: 100%;
             height: 100%;
-            background-color: #000000;
+            background-color: #050505;
             overflow: hidden;
             position: fixed;
             touch-action: none;
@@ -30,15 +30,15 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            perspective: 2200px;
-            background: #000000;
+            perspective: 2000px;
+            background: radial-gradient(circle at center, #1a1a1a 0%, #050505 100%);
         }
 
         .brochure {
             position: relative;
             width: 100%;
             height: 100%;
-            max-width: 500px; /* الحجم المثالي لأبعاد شاشات الموبايل */
+            max-width: 480px;
             max-height: 96vh;
             transform-style: preserve-3d;
         }
@@ -49,13 +49,14 @@
             left: 0;
             width: 100%;
             height: 100%;
-            transform-origin: right center; /* محور الدوران من اليمين للقراءة العربية */
+            transform-origin: right center;
             transform-style: preserve-3d;
-            transition: transform 0.65s cubic-bezier(0.25, 1, 0.5, 1);
+            transition: transform 0.75s cubic-bezier(0.3, 0.15, 0.2, 1);
             will-change: transform;
-            border-radius: 4px;
+            border-radius: 3px;
             overflow: hidden;
-            background-color: #000000;
+            background-color: #111;
+            box-shadow: -4px 0 15px rgba(0, 0, 0, 0.5);
         }
 
         .page img {
@@ -66,27 +67,47 @@
             pointer-events: none;
         }
 
-        /* طبقة الظل التفاعلي لمحاكاة عمق الورقة */
-        .page .shadow-overlay {
+        /* محاكاة تقوس الورقة عبر موجة الضوء والظل */
+        .page .curl-layer {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: linear-gradient(to left, rgba(0,0,0,0.5) 0%, rgba(0,0,0,0.05) 20%, rgba(0,0,0,0) 100%);
+            pointer-events: none;
+            background: linear-gradient(
+                to left,
+                rgba(0, 0, 0, 0.6) 0%,
+                rgba(255, 255, 255, 0.3) 25%,
+                rgba(0, 0, 0, 0.45) 50%,
+                rgba(0, 0, 0, 0) 100%
+            );
             opacity: 0;
-            transition: opacity 0.65s ease;
+            transform: translateX(-100%);
+            transition: opacity 0.75s ease, transform 0.75s cubic-bezier(0.3, 0.15, 0.2, 1);
+        }
+
+        /* ظل السقوط بين الصفحات */
+        .page .spine-shadow {
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 40px;
+            height: 100%;
+            background: linear-gradient(to left, rgba(0, 0, 0, 0.7) 0%, transparent 100%);
             pointer-events: none;
         }
 
-        /* حالة الصفحة المطوية للخلف */
+        /* حالة الورقة بعد التقليب */
         .page.flipped {
             transform: rotateY(180deg);
             pointer-events: none;
+            box-shadow: 4px 0 15px rgba(0, 0, 0, 0.5);
         }
 
-        .page.flipped .shadow-overlay {
+        .page.flipped .curl-layer {
             opacity: 1;
+            transform: translateX(100%);
         }
     </style>
 </head>
@@ -94,13 +115,36 @@
 
     <div class="viewer">
         <div class="brochure" id="brochure">
-            <!-- ترتيب الصفحات من الغلاف إلى النهاية -->
-            <div class="page" style="z-index: 6;"><img src="1.jpg" alt="1"><div class="shadow-overlay"></div></div>
-            <div class="page" style="z-index: 5;"><img src="2.jpg" alt="2"><div class="shadow-overlay"></div></div>
-            <div class="page" style="z-index: 4;"><img src="3.jpg" alt="3"><div class="shadow-overlay"></div></div>
-            <div class="page" style="z-index: 3;"><img src="4.jpg" alt="4"><div class="shadow-overlay"></div></div>
-            <div class="page" style="z-index: 2;"><img src="5.jpg" alt="5"><div class="shadow-overlay"></div></div>
-            <div class="page" style="z-index: 1;"><img src="6.jpg" alt="6"><div class="shadow-overlay"></div></div>
+            <div class="page" style="z-index: 6;">
+                <img src="1.jpg" alt="1">
+                <div class="spine-shadow"></div>
+                <div class="curl-layer"></div>
+            </div>
+            <div class="page" style="z-index: 5;">
+                <img src="2.jpg" alt="2">
+                <div class="spine-shadow"></div>
+                <div class="curl-layer"></div>
+            </div>
+            <div class="page" style="z-index: 4;">
+                <img src="3.jpg" alt="3">
+                <div class="spine-shadow"></div>
+                <div class="curl-layer"></div>
+            </div>
+            <div class="page" style="z-index: 3;">
+                <img src="4.jpg" alt="4">
+                <div class="spine-shadow"></div>
+                <div class="curl-layer"></div>
+            </div>
+            <div class="page" style="z-index: 2;">
+                <img src="5.jpg" alt="5">
+                <div class="spine-shadow"></div>
+                <div class="curl-layer"></div>
+            </div>
+            <div class="page" style="z-index: 1;">
+                <img src="6.jpg" alt="6">
+                <div class="spine-shadow"></div>
+                <div class="curl-layer"></div>
+            </div>
         </div>
     </div>
 
@@ -136,13 +180,12 @@
                 let diffX = e.changedTouches[0].clientX - startX;
                 let diffY = e.changedTouches[0].clientY - startY;
 
-                // التحقق من حركة السحب الأفقي
                 if (Math.abs(diffX) > 35 && Math.abs(diffX) > Math.abs(diffY)) {
                     if (diffX > 0) {
-                        // سحب لليمين (تقليب الورقة للأمام في الاتجاه العربي)
+                        // سحب لليمين: تقليب للأمام بانثناء مرن
                         flipNext();
                     } else {
-                        // سحب لليسار (إعادة الورقة للخلف بانثناء كامل)
+                        // سحب لليسار: رجوع للخلف بانثناء مرن ومطابق
                         flipPrev();
                     }
                 }
