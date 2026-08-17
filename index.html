@@ -14,8 +14,6 @@
         html, body {
             width: 100%;
             height: 100%;
-            margin: 0;
-            padding: 0;
             overflow: hidden;
             background-color: #000000;
             position: fixed;
@@ -35,12 +33,16 @@
             position: absolute;
             top: 0;
             left: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
 
         #book {
             width: 100% !important;
             height: 100% !important;
             transform: scaleX(-1);
+            transform-style: preserve-3d;
         }
 
         .page {
@@ -48,6 +50,8 @@
             height: 100% !important;
             background-color: #000000;
             overflow: hidden;
+            backface-visibility: hidden;
+            -webkit-backface-visibility: hidden;
         }
 
         .page img {
@@ -57,6 +61,7 @@
             display: block;
             pointer-events: none;
             transform: scaleX(-1);
+            will-change: transform;
         }
     </style>
 </head>
@@ -92,7 +97,7 @@
                 startPage: 0,
                 mobileScrollSupport: false,
                 flippingTime: 700,
-                useMouseEvents: false, /* تم الإيقاف لمنع اللمس العكسي للحواف */
+                useMouseEvents: false,
                 clickEventForward: false
             });
 
@@ -113,14 +118,14 @@
                 let diffX = endX - startX;
                 let diffY = endY - startY;
 
-                // التحقق من أن الحركة أفقية ومقصودة وبمسافة واضحة
+                // التحقق من أن السحب أفقي ومقصود
                 if (Math.abs(diffX) > 40 && Math.abs(diffX) > Math.abs(diffY)) {
                     if (diffX > 0) {
-                        // سحب طبيعي من اليسار إلى اليمين -> يقلب للأمام (انثناء ورقي 3D كامل)
-                        pageFlip.flipNext('top-right');
+                        // سحب للأمام مع انثناء ثلاثي الأبعاد سليم
+                        pageFlip.flipNext('top');
                     } else {
-                        // سحب طبيعي من اليمين إلى اليسار -> يرجع للخلف
-                        pageFlip.flipPrev('top-left');
+                        // سحب للخلف مع انثناء ثلاثي الأبعاد سليم
+                        pageFlip.flipPrev('top');
                     }
                 }
             }, { passive: true });
