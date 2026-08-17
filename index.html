@@ -57,7 +57,7 @@
 </head>
 <body>
 
-    <div class="container">
+    <div class="container" id="touch-zone">
         <div id="flipbook">
             <div class="page"><img src="1.jpg" alt="1"></div>
             <div class="page"><img src="2.jpg" alt="2"></div>
@@ -82,27 +82,31 @@
                 autoCenter: true,
                 display: 'single',
                 direction: 'rtl',
-                elevation: 50,
+                elevation: 60,
                 gradients: true,
                 acceleration: true,
-                duration: 600
+                duration: 650,
+                turnCorners: 'none' /* إيقاف التقاط الزوايا التلقائي لمنع التشتت والارتداد */
             });
+
+            // إلغاء أحداث اللمس الخاصة بالمكتبة لمنع تضارب الإيماءات
+            $book.off('touchstart touchmove touchend pointerdown pointermove pointerup');
 
             let touchStartX = 0;
             let touchStartY = 0;
             let touchStartTime = 0;
 
-            window.addEventListener('touchstart', function(e) {
+            const touchZone = document.getElementById('touch-zone');
+
+            touchZone.addEventListener('touchstart', function(e) {
+                if (e.touches.length > 1) return;
                 touchStartX = e.touches[0].clientX;
                 touchStartY = e.touches[0].clientY;
                 touchStartTime = Date.now();
             }, { passive: true });
 
-            window.addEventListener('touchend', function(e) {
-                // منع استقبال أي سحب جديد إذا كانت الورقة في حالة حركة
-                if ($book.turn('animating')) {
-                    return;
-                }
+            touchZone.addEventListener('touchend', function(e) {
+                if ($book.turn('animating')) return;
 
                 let touchEndX = e.changedTouches[0].clientX;
                 let touchEndY = e.changedTouches[0].clientY;
@@ -110,13 +114,13 @@
                 let diffY = touchEndY - touchStartY;
                 let elapsedTime = Date.now() - touchStartTime;
 
-                // التحقق من أن السحب مقصود وأفقي وبوقت مناسب
-                if (Math.abs(diffX) > 45 && Math.abs(diffX) > Math.abs(diffY) && elapsedTime < 700) {
-                    if (diffX > 0) {
-                        // سحب لليمين: تقليب منتظم للأمام
+                // التأكد من أن السحب أفقي ومقصود
+                if (Math.abs(diffX) > 40 && Math.abs(diffX) > Math.abs(diffY) && elapsedTime < 600) {
+                    if (diffX < 0) {
+                        // سحب نحو اليسار: تقليب للأمام بانثناء مرن
                         $book.turn('next');
                     } else {
-                        // سحب لليسار: رجوع منتظم للخلف
+                        // سحب نحو اليمين: رجوع للخلف بانثناء مرن
                         $book.turn('previous');
                     }
                 }
