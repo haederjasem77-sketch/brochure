@@ -15,7 +15,7 @@
             width: 100%;
             height: 100%;
             overflow: hidden;
-            background-color: #050505;
+            background-color: #000000;
             position: fixed;
             touch-action: none;
             user-select: none;
@@ -29,7 +29,7 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            background-color: #050505;
+            background-color: #000000;
         }
 
         #flipbook {
@@ -51,6 +51,7 @@
             object-fit: fill;
             display: block;
             pointer-events: none;
+            -webkit-user-drag: none;
         }
     </style>
 </head>
@@ -67,54 +68,63 @@
         </div>
     </div>
 
-    <!-- مكتبات محاكاة انثناء الورق الحقيقي -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/turn.js/3/turn.min.js"></script>
     <script>
         $(document).ready(function() {
+            const $book = $('#flipbook');
             const screenW = $(window).width();
             const screenH = $(window).height();
 
-            $('#flipbook').turn({
+            $book.turn({
                 width: screenW,
                 height: screenH,
                 autoCenter: true,
-                display: 'single',       // صفحة مفردة تملأ شاشة الموبايل بالكامل
-                direction: 'rtl',        // تقليب عربي أصيل دون عكس الشاشة
-                elevation: 60,           // عمق تقوس وانثناء زاوية الورقة أثناء الحركة
-                gradients: true,         // تدرجات لمعان وظلال ثني الورق
-                acceleration: true,      // معالجة بالـ GPU لضمان أقصى سلاسة
-                duration: 750            // وقت الانثناء الطبيعي
+                display: 'single',
+                direction: 'rtl',
+                elevation: 50,
+                gradients: true,
+                acceleration: true,
+                duration: 600
             });
 
-            // إيماءات اللمس والسحب بالاتجاهين
             let touchStartX = 0;
             let touchStartY = 0;
+            let touchStartTime = 0;
 
             window.addEventListener('touchstart', function(e) {
                 touchStartX = e.touches[0].clientX;
                 touchStartY = e.touches[0].clientY;
+                touchStartTime = Date.now();
             }, { passive: true });
 
             window.addEventListener('touchend', function(e) {
-                let diffX = e.changedTouches[0].clientX - touchStartX;
-                let diffY = e.changedTouches[0].clientY - touchStartY;
+                // منع استقبال أي سحب جديد إذا كانت الورقة في حالة حركة
+                if ($book.turn('animating')) {
+                    return;
+                }
 
-                if (Math.abs(diffX) > 30 && Math.abs(diffX) > Math.abs(diffY)) {
+                let touchEndX = e.changedTouches[0].clientX;
+                let touchEndY = e.changedTouches[0].clientY;
+                let diffX = touchEndX - touchStartX;
+                let diffY = touchEndY - touchStartY;
+                let elapsedTime = Date.now() - touchStartTime;
+
+                // التحقق من أن السحب مقصود وأفقي وبوقت مناسب
+                if (Math.abs(diffX) > 45 && Math.abs(diffX) > Math.abs(diffY) && elapsedTime < 700) {
                     if (diffX > 0) {
-                        // سحب لليمين: تقليب للأمام بانثناء وتقوس حقيقي
-                        $('#flipbook').turn('next');
+                        // سحب لليمين: تقليب منتظم للأمام
+                        $book.turn('next');
                     } else {
-                        // سحب لليسار: رجوع للخلف بانثناء وتقوس حقيقي مطابق
-                        $('#flipbook').turn('previous');
+                        // سحب لليسار: رجوع منتظم للخلف
+                        $book.turn('previous');
                     }
                 }
             }, { passive: true });
 
-            // تحديث القياسات تلقائياً عند تغيير حجم الشاشة
             $(window).on('resize orientationchange', function() {
                 setTimeout(function() {
-                    $('#flipbook').turn('size', $(window).width(), $(window).height());
+                    $book.turn('size', $(window).width(), $(window).height());
                 }, 150);
             });
         });
