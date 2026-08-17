@@ -42,7 +42,6 @@
             width: 100% !important;
             height: 100% !important;
             transform: scaleX(-1);
-            transform-style: preserve-3d;
         }
 
         .page {
@@ -50,8 +49,6 @@
             height: 100% !important;
             background-color: #000000;
             overflow: hidden;
-            backface-visibility: hidden;
-            -webkit-backface-visibility: hidden;
         }
 
         .page img {
@@ -61,7 +58,6 @@
             display: block;
             pointer-events: none;
             transform: scaleX(-1);
-            will-change: transform;
         }
     </style>
 </head>
@@ -69,12 +65,13 @@
 
     <div class="container">
         <div id="book">
-            <div class="page"><img src="1.jpg" alt="1"></div>
-            <div class="page"><img src="2.jpg" alt="2"></div>
-            <div class="page"><img src="3.jpg" alt="3"></div>
-            <div class="page"><img src="4.jpg" alt="4"></div>
-            <div class="page"><img src="5.jpg" alt="5"></div>
-            <div class="page"><img src="6.jpg" alt="6"></div>
+            <!-- إضافة data-density="soft" تجبر كل الصفحات على الانثناء الورقي المرن -->
+            <div class="page" data-density="soft"><img src="1.jpg" alt="1"></div>
+            <div class="page" data-density="soft"><img src="2.jpg" alt="2"></div>
+            <div class="page" data-density="soft"><img src="3.jpg" alt="3"></div>
+            <div class="page" data-density="soft"><img src="4.jpg" alt="4"></div>
+            <div class="page" data-density="soft"><img src="5.jpg" alt="5"></div>
+            <div class="page" data-density="soft"><img src="6.jpg" alt="6"></div>
         </div>
     </div>
 
@@ -96,7 +93,7 @@
                 usePortrait: true,
                 startPage: 0,
                 mobileScrollSupport: false,
-                flippingTime: 700,
+                flippingTime: 750,
                 useMouseEvents: false,
                 clickEventForward: false
             });
@@ -118,13 +115,13 @@
                 let diffX = endX - startX;
                 let diffY = endY - startY;
 
-                // التحقق من أن السحب أفقي ومقصود
-                if (Math.abs(diffX) > 40 && Math.abs(diffX) > Math.abs(diffY)) {
+                // التأكد من أن السحب أفقي ومقصود
+                if (Math.abs(diffX) > 35 && Math.abs(diffX) > Math.abs(diffY)) {
                     if (diffX > 0) {
-                        // سحب للأمام مع انثناء ثلاثي الأبعاد سليم
+                        // سحب من اليسار لليمين -> يقلب للأمام بانثناء مرن
                         pageFlip.flipNext('top');
                     } else {
-                        // سحب للخلف مع انثناء ثلاثي الأبعاد سليم
+                        // سحب من اليمين لليسار -> يرجع للخلف بانثناء مرن
                         pageFlip.flipPrev('top');
                     }
                 }
