@@ -14,182 +14,109 @@
         html, body {
             width: 100%;
             height: 100%;
-            background-color: #050505;
             overflow: hidden;
+            background-color: #050505;
             position: fixed;
             touch-action: none;
             user-select: none;
             -webkit-user-select: none;
-            font-family: sans-serif;
         }
 
-        .viewer {
+        .container {
             width: 100vw;
             height: 100vh;
             height: 100dvh;
             display: flex;
             justify-content: center;
             align-items: center;
-            perspective: 2000px;
-            background: radial-gradient(circle at center, #1a1a1a 0%, #050505 100%);
+            background-color: #050505;
         }
 
-        .brochure {
-            position: relative;
-            width: 100%;
-            height: 100%;
-            max-width: 480px;
-            max-height: 96vh;
-            transform-style: preserve-3d;
+        #flipbook {
+            width: 100vw;
+            height: 100vh;
+            height: 100dvh;
         }
 
-        .page {
-            position: absolute;
-            top: 0;
-            left: 0;
+        #flipbook .page {
             width: 100%;
             height: 100%;
-            transform-origin: right center;
-            transform-style: preserve-3d;
-            transition: transform 0.75s cubic-bezier(0.3, 0.15, 0.2, 1);
-            will-change: transform;
-            border-radius: 3px;
+            background-color: #000000;
             overflow: hidden;
-            background-color: #111;
-            box-shadow: -4px 0 15px rgba(0, 0, 0, 0.5);
         }
 
-        .page img {
+        #flipbook .page img {
             width: 100%;
             height: 100%;
             object-fit: fill;
             display: block;
             pointer-events: none;
         }
-
-        /* محاكاة تقوس الورقة عبر موجة الضوء والظل */
-        .page .curl-layer {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            background: linear-gradient(
-                to left,
-                rgba(0, 0, 0, 0.6) 0%,
-                rgba(255, 255, 255, 0.3) 25%,
-                rgba(0, 0, 0, 0.45) 50%,
-                rgba(0, 0, 0, 0) 100%
-            );
-            opacity: 0;
-            transform: translateX(-100%);
-            transition: opacity 0.75s ease, transform 0.75s cubic-bezier(0.3, 0.15, 0.2, 1);
-        }
-
-        /* ظل السقوط بين الصفحات */
-        .page .spine-shadow {
-            position: absolute;
-            top: 0;
-            right: 0;
-            width: 40px;
-            height: 100%;
-            background: linear-gradient(to left, rgba(0, 0, 0, 0.7) 0%, transparent 100%);
-            pointer-events: none;
-        }
-
-        /* حالة الورقة بعد التقليب */
-        .page.flipped {
-            transform: rotateY(180deg);
-            pointer-events: none;
-            box-shadow: 4px 0 15px rgba(0, 0, 0, 0.5);
-        }
-
-        .page.flipped .curl-layer {
-            opacity: 1;
-            transform: translateX(100%);
-        }
     </style>
 </head>
 <body>
 
-    <div class="viewer">
-        <div class="brochure" id="brochure">
-            <div class="page" style="z-index: 6;">
-                <img src="1.jpg" alt="1">
-                <div class="spine-shadow"></div>
-                <div class="curl-layer"></div>
-            </div>
-            <div class="page" style="z-index: 5;">
-                <img src="2.jpg" alt="2">
-                <div class="spine-shadow"></div>
-                <div class="curl-layer"></div>
-            </div>
-            <div class="page" style="z-index: 4;">
-                <img src="3.jpg" alt="3">
-                <div class="spine-shadow"></div>
-                <div class="curl-layer"></div>
-            </div>
-            <div class="page" style="z-index: 3;">
-                <img src="4.jpg" alt="4">
-                <div class="spine-shadow"></div>
-                <div class="curl-layer"></div>
-            </div>
-            <div class="page" style="z-index: 2;">
-                <img src="5.jpg" alt="5">
-                <div class="spine-shadow"></div>
-                <div class="curl-layer"></div>
-            </div>
-            <div class="page" style="z-index: 1;">
-                <img src="6.jpg" alt="6">
-                <div class="spine-shadow"></div>
-                <div class="curl-layer"></div>
-            </div>
+    <div class="container">
+        <div id="flipbook">
+            <div class="page"><img src="1.jpg" alt="1"></div>
+            <div class="page"><img src="2.jpg" alt="2"></div>
+            <div class="page"><img src="3.jpg" alt="3"></div>
+            <div class="page"><img src="4.jpg" alt="4"></div>
+            <div class="page"><img src="5.jpg" alt="5"></div>
+            <div class="page"><img src="6.jpg" alt="6"></div>
         </div>
     </div>
 
+    <!-- مكتبات محاكاة انثناء الورق الحقيقي -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/turn.js/3/turn.min.js"></script>
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const pages = Array.from(document.querySelectorAll('.page'));
-            const totalPages = pages.length;
-            let currentIndex = 0;
+        $(document).ready(function() {
+            const screenW = $(window).width();
+            const screenH = $(window).height();
 
-            function flipNext() {
-                if (currentIndex < totalPages - 1) {
-                    pages[currentIndex].classList.add('flipped');
-                    currentIndex++;
-                }
-            }
+            $('#flipbook').turn({
+                width: screenW,
+                height: screenH,
+                autoCenter: true,
+                display: 'single',       // صفحة مفردة تملأ شاشة الموبايل بالكامل
+                direction: 'rtl',        // تقليب عربي أصيل دون عكس الشاشة
+                elevation: 60,           // عمق تقوس وانثناء زاوية الورقة أثناء الحركة
+                gradients: true,         // تدرجات لمعان وظلال ثني الورق
+                acceleration: true,      // معالجة بالـ GPU لضمان أقصى سلاسة
+                duration: 750            // وقت الانثناء الطبيعي
+            });
 
-            function flipPrev() {
-                if (currentIndex > 0) {
-                    currentIndex--;
-                    pages[currentIndex].classList.remove('flipped');
-                }
-            }
-
-            let startX = 0;
-            let startY = 0;
+            // إيماءات اللمس والسحب بالاتجاهين
+            let touchStartX = 0;
+            let touchStartY = 0;
 
             window.addEventListener('touchstart', function(e) {
-                startX = e.touches[0].clientX;
-                startY = e.touches[0].clientY;
+                touchStartX = e.touches[0].clientX;
+                touchStartY = e.touches[0].clientY;
             }, { passive: true });
 
             window.addEventListener('touchend', function(e) {
-                let diffX = e.changedTouches[0].clientX - startX;
-                let diffY = e.changedTouches[0].clientY - startY;
+                let diffX = e.changedTouches[0].clientX - touchStartX;
+                let diffY = e.changedTouches[0].clientY - touchStartY;
 
-                if (Math.abs(diffX) > 35 && Math.abs(diffX) > Math.abs(diffY)) {
+                if (Math.abs(diffX) > 30 && Math.abs(diffX) > Math.abs(diffY)) {
                     if (diffX > 0) {
-                        // سحب لليمين: تقليب للأمام بانثناء مرن
-                        flipNext();
+                        // سحب لليمين: تقليب للأمام بانثناء وتقوس حقيقي
+                        $('#flipbook').turn('next');
                     } else {
-                        // سحب لليسار: رجوع للخلف بانثناء مرن ومطابق
-                        flipPrev();
+                        // سحب لليسار: رجوع للخلف بانثناء وتقوس حقيقي مطابق
+                        $('#flipbook').turn('previous');
                     }
                 }
             }, { passive: true });
+
+            // تحديث القياسات تلقائياً عند تغيير حجم الشاشة
+            $(window).on('resize orientationchange', function() {
+                setTimeout(function() {
+                    $('#flipbook').turn('size', $(window).width(), $(window).height());
+                }, 150);
+            });
         });
     </script>
 </body>
