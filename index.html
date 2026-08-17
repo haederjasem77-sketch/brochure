@@ -31,7 +31,7 @@
             overflow: hidden;
         }
 
-        /* طبقة عزل اللمس لمنع العشوائية والارتداد */
+        /* طبقة عزل اللمس لضمان دقة اتجاه السحب */
         #touch-overlay {
             position: absolute;
             top: 0;
@@ -67,7 +67,6 @@
 <body>
 
     <div class="container">
-        <!-- طبقة استقبال السحب الحصري -->
         <div id="touch-overlay"></div>
 
         <div id="flipbook">
@@ -88,7 +87,6 @@
             const screenW = $(window).width();
             const screenH = $(window).height();
 
-            // تهيئة محرك ثني الورق بملء شاشة الموبايل
             $book.turn({
                 width: screenW,
                 height: screenH,
@@ -113,7 +111,6 @@
             }, { passive: true });
 
             overlay.addEventListener('touchend', function(e) {
-                // منع التداخل أثناء تقليب الورقة
                 if ($book.turn('animating')) return;
 
                 let touchEndX = e.changedTouches[0].clientX;
@@ -122,13 +119,12 @@
                 let diffY = touchEndY - touchStartY;
                 let elapsedTime = Date.now() - touchStartTime;
 
-                // التأكد من أن الحركة أفقية ومقصودة
                 if (Math.abs(diffX) > 35 && Math.abs(diffX) > Math.abs(diffY) && elapsedTime < 700) {
-                    if (diffX > 0) {
-                        // سحب من اليسار إلى اليمين: يقلب للأمام بانثناء ورقي كامل
+                    if (diffX < 0) {
+                        // سحب من اليمين إلى اليسار -> تقليب الصفحة التالية للأمام
                         $book.turn('next');
                     } else {
-                        // سحب من اليمين إلى اليسار: يرجع للخلف بانثناء ورقي مطابق
+                        // سحب من اليسار إلى اليمين -> العودة للصفحة السابقة للخلف
                         $book.turn('previous');
                     }
                 }
