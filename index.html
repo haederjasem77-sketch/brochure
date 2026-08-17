@@ -5,67 +5,35 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>البروشور التفاعلي العربي</title>
     <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-
+        * { box-sizing: border-box; margin: 0; padding: 0; }
         html, body {
-            width: 100%;
-            height: 100%;
-            overflow: hidden;
-            background-color: #000000;
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            touch-action: none;
-            user-select: none;
-            -webkit-user-select: none;
+            width: 100%; height: 100%; overflow: hidden;
+            background-color: #000; position: fixed;
+            touch-action: none; user-select: none;
         }
-
         .container {
-            width: 100vw;
-            height: 100vh;
-            height: 100dvh;
-            position: absolute;
-            top: 0;
-            left: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            width: 100vw; height: 100vh; height: 100dvh;
+            display: flex; justify-content: center; align-items: center;
         }
-
-        #book {
-            width: 100% !important;
-            height: 100% !important;
-            transform: scaleX(-1);
-        }
-
+        /* إزالة transform: scaleX(-1) من هنا */
+        #book { width: 100% !important; height: 100% !important; }
+        
         .page {
-            width: 100% !important;
-            height: 100% !important;
-            background-color: #000000;
-            overflow: hidden;
+            width: 100% !important; height: 100% !important;
+            background-color: #000; overflow: hidden;
         }
 
         .page img {
-            width: 100% !important;
-            height: 100% !important;
-            object-fit: fill !important;
-            display: block;
-            pointer-events: none;
-            transform: scaleX(-1);
+            width: 100% !important; height: 100% !important;
+            /* استخدام contain بدل fill لمنع التشوه */
+            object-fit: contain !important; 
+            display: block; pointer-events: none;
         }
     </style>
 </head>
 <body>
-
     <div class="container">
         <div id="book">
-            <!-- إضافة data-density="soft" تجبر كل الصفحات على الانثناء الورقي المرن -->
             <div class="page" data-density="soft"><img src="1.jpg" alt="1"></div>
             <div class="page" data-density="soft"><img src="2.jpg" alt="2"></div>
             <div class="page" data-density="soft"><img src="3.jpg" alt="3"></div>
@@ -78,54 +46,19 @@
     <script src="https://cdn.jsdelivr.net/npm/page-flip@2.0.7/dist/js/page-flip.browser.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            const bookElem = document.getElementById('book');
-
-            const pageFlip = new St.PageFlip(bookElem, {
-                width: window.innerWidth,
-                height: window.innerHeight,
-                size: "stretch",
-                minWidth: 200,
-                maxWidth: 2500,
-                minHeight: 300,
-                maxHeight: 2500,
+            const pageFlip = new St.PageFlip(document.getElementById('book'), {
+                width: 600, // حدد عرضاً افتراضياً
+                height: 800, // حدد طولاً افتراضياً
+                size: "stretch", // ستتمدد داخل الحاوية
+                isRTL: true, // هذه الخاصية تغنيك عن الـ CSS المقلوب
                 maxShadowOpacity: 0.85,
                 showCover: false,
                 usePortrait: true,
-                startPage: 0,
-                mobileScrollSupport: false,
-                flippingTime: 750,
-                useMouseEvents: false,
-                clickEventForward: false
+                mobileScrollSupport: true, // تفعيل دعم اللمس بشكل طبيعي
+                flippingTime: 700
             });
 
-            const pages = document.querySelectorAll('.page');
-            pageFlip.loadFromHTML(pages);
-
-            let startX = 0;
-            let startY = 0;
-
-            window.addEventListener('touchstart', function(e) {
-                startX = e.touches[0].clientX;
-                startY = e.touches[0].clientY;
-            }, { passive: true });
-
-            window.addEventListener('touchend', function(e) {
-                let endX = e.changedTouches[0].clientX;
-                let endY = e.changedTouches[0].clientY;
-                let diffX = endX - startX;
-                let diffY = endY - startY;
-
-                // التأكد من أن السحب أفقي ومقصود
-                if (Math.abs(diffX) > 35 && Math.abs(diffX) > Math.abs(diffY)) {
-                    if (diffX > 0) {
-                        // سحب من اليسار لليمين -> يقلب للأمام بانثناء مرن
-                        pageFlip.flipNext('top');
-                    } else {
-                        // سحب من اليمين لليسار -> يرجع للخلف بانثناء مرن
-                        pageFlip.flipPrev('top');
-                    }
-                }
-            }, { passive: true });
+            pageFlip.loadFromHTML(document.querySelectorAll('.page'));
         });
     </script>
 </body>
