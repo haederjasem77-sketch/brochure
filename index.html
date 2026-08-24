@@ -4,11 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>البروشور التفاعلي</title>
+    <!-- استدعاء المكتبة المحلية المرفوعة في المستودع -->
+    <script src="page-flip.browser.js"></script>
     <style>
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
+            user-select: none;
+            -webkit-user-select: none;
         }
 
         html, body {
@@ -17,9 +21,7 @@
             overflow: hidden;
             background-color: #000000;
             position: fixed;
-            touch-action: none;
-            user-select: none;
-            -webkit-user-select: none;
+            touch-action: pan-y;
             font-family: system-ui, -apple-system, sans-serif;
         }
 
@@ -27,35 +29,27 @@
             width: 100vw;
             height: 100vh;
             height: 100dvh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
             position: relative;
             background-color: #000000;
             overflow: hidden;
         }
 
-        /* طبقة التقليب باللمس */
-        #touch-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 100;
-            touch-action: none;
+        #book {
+            margin: auto;
+            box-shadow: 0 0 25px rgba(0,0,0,0.9);
         }
 
-        #flipbook {
-            width: 100%;
-            height: 100%;
-        }
-
-        #flipbook .page {
+        .page {
             width: 100%;
             height: 100%;
             background-color: #000000;
             overflow: hidden;
         }
 
-        #flipbook .page img {
+        .page img {
             width: 100%;
             height: 100%;
             object-fit: fill;
@@ -64,13 +58,13 @@
             -webkit-user-drag: none;
         }
 
-        /* تلميح اليد المتحركة */
+        /* رسالة التنبيه الإرشادية */
         .hint-badge {
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            background: rgba(0, 0, 0, 0.82);
+            background: rgba(0, 0, 0, 0.85);
             color: #ffffff;
             padding: 12px 22px;
             border-radius: 30px;
@@ -80,10 +74,10 @@
             align-items: center;
             gap: 10px;
             pointer-events: none;
-            z-index: 200;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.6);
+            z-index: 1000;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.7);
             border: 1px solid rgba(255,255,255,0.25);
-            animation: fadeOutHint 4.5s forwards ease-in-out;
+            animation: fadeOutHint 4s forwards ease-in-out;
         }
 
         .hand-icon {
@@ -93,7 +87,7 @@
 
         @keyframes swipeHand {
             0%, 100% { transform: translateX(0); }
-            50% { transform: translateX(18px); }
+            50% { transform: translateX(-18px); }
         }
 
         @keyframes fadeOutHint {
@@ -103,36 +97,36 @@
             100% { opacity: 0; visibility: hidden; }
         }
 
-        /* شريط تحكم سفلي أنيق وشفاف */
+        /* شريط التنقل السفلي */
         .ui-controls {
             position: absolute;
-            bottom: 20px;
+            bottom: 25px;
             left: 50%;
             transform: translateX(-50%);
             display: flex;
             align-items: center;
             gap: 14px;
-            background: rgba(20, 20, 20, 0.75);
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
-            padding: 6px 16px;
+            background: rgba(20, 20, 20, 0.82);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            padding: 7px 18px;
             border-radius: 25px;
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            z-index: 200;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            z-index: 900;
         }
 
         .ui-btn {
             background: rgba(255, 255, 255, 0.15);
-            border: none;
+            border: 1px solid rgba(255, 255, 255, 0.1);
             color: #fff;
-            padding: 6px 12px;
+            padding: 6px 14px;
             border-radius: 16px;
             font-size: 13px;
             cursor: pointer;
         }
 
         .ui-btn:active {
-            background: rgba(255, 255, 255, 0.3);
+            background: rgba(255, 255, 255, 0.35);
         }
 
         .page-num {
@@ -146,22 +140,14 @@
 <body>
 
     <div class="container">
-        <!-- طبقة التنبيه الإرشادي -->
+        <!-- التنبيه التوضيحي -->
         <div id="hintBadge" class="hint-badge">
-            <span class="hand-icon">👉</span>
-            <span>اسحب الشاشة لتصفح باقي الصفحات</span>
+            <span class="hand-icon">👈</span>
+            <span>اسحب أو انقر لتصفح البروشور</span>
         </div>
 
-        <!-- أزرار التنقل والترقيم -->
-        <div class="ui-controls">
-            <button class="ui-btn" id="btnNext">التالي ⬅</button>
-            <span class="page-num" id="pageIndicator">1 / 6</span>
-            <button class="ui-btn" id="btnPrev">➡ السابق</button>
-        </div>
-
-        <div id="touch-overlay"></div>
-
-        <div id="flipbook">
+        <!-- ألبوم الصفحات -->
+        <div id="book">
             <div class="page"><img src="1.jpg" alt="1"></div>
             <div class="page"><img src="2.jpg" alt="2"></div>
             <div class="page"><img src="3.jpg" alt="3"></div>
@@ -169,84 +155,57 @@
             <div class="page"><img src="5.jpg" alt="5"></div>
             <div class="page"><img src="6.jpg" alt="6"></div>
         </div>
+
+        <!-- أزرار التحكم -->
+        <div class="ui-controls">
+            <button class="ui-btn" id="btnNext">التالي ⬅</button>
+            <span class="page-num" id="pageIndicator">1 / 6</span>
+            <button class="ui-btn" id="btnPrev">➡ السابق</button>
+        </div>
     </div>
 
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <!-- تم التحديث إلى الإصدار 4 لدعم RTL الأصلي -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/turn.js/4.1.0/turn.min.js"></script>
     <script>
-        $(document).ready(function() {
-            const $book = $('#flipbook');
-            const screenW = $(window).width();
-            const screenH = $(window).height();
+        document.addEventListener('DOMContentLoaded', function() {
+            const bookElement = document.getElementById('book');
             const totalPages = 6;
+            const screenW = window.innerWidth;
+            const screenH = window.innerHeight;
 
-            $book.turn({
+            const pageFlip = new St.PageFlip(bookElement, {
                 width: screenW,
                 height: screenH,
-                autoCenter: true,
-                display: 'single',
-                elevation: 60,
-                gradients: true,
-                acceleration: true,
-                duration: 600,
-                direction: 'rtl' // ضبط اتجاه حركة الورق للكتاب العربي
+                size: "stretch",
+                minWidth: 280,
+                maxWidth: 1200,
+                minHeight: 400,
+                maxHeight: 2000,
+                showCover: false,
+                usePortrait: true,
+                mobileScrollSupport: false,
+                direction: 'rtl' // الاتجاه العربي من اليمين لليسار
             });
 
-            // تحديث رقم الصفحة عند التقليب
-            $book.bind('turned', function(event, page) {
-                $('#pageIndicator').text(page + ' / ' + totalPages);
-            });
+            pageFlip.loadFromHTML(document.querySelectorAll('.page'));
 
-            let touchStartX = 0;
-            let touchStartY = 0;
-            let touchStartTime = 0;
-
-            const overlay = document.getElementById('touch-overlay');
+            const indicator = document.getElementById('pageIndicator');
             const hint = document.getElementById('hintBadge');
 
-            overlay.addEventListener('touchstart', function(e) {
-                touchStartX = e.touches[0].clientX;
-                touchStartY = e.touches[0].clientY;
-                touchStartTime = Date.now();
-                if (hint) hint.style.display = 'none';
-            }, { passive: true });
-
-            overlay.addEventListener('touchend', function(e) {
-                if ($book.turn('animating')) return;
-
-                let touchEndX = e.changedTouches[0].clientX;
-                let touchEndY = e.changedTouches[0].clientY;
-                let diffX = touchEndX - touchStartX;
-                let diffY = touchEndY - touchStartY;
-                let elapsedTime = Date.now() - touchStartTime;
-
-                if (Math.abs(diffX) > 35 && Math.abs(diffX) > Math.abs(diffY) && elapsedTime < 700) {
-                    if (diffX > 0) {
-                        // سحب من اليسار إلى اليمين -> تقليب الصفحة التالية (عربي)
-                        $book.turn('next');
-                    } else {
-                        // سحب من اليمين إلى اليسار -> الرجوع للصفحة السابقة
-                        $book.turn('previous');
-                    }
-                }
-            }, { passive: true });
-
-            // التحكم عبر الأزرار السفلية
-            $('#btnNext').on('click', function() {
-                if (hint) hint.style.display = 'none';
-                $book.turn('next');
+            pageFlip.on('flip', (e) => {
+                indicator.innerText = `${e.data + 1} / ${totalPages}`;
             });
 
-            $('#btnPrev').on('click', function() {
+            pageFlip.on('changeState', () => {
                 if (hint) hint.style.display = 'none';
-                $book.turn('previous');
             });
 
-            $(window).on('resize orientationchange', function() {
-                setTimeout(function() {
-                    $book.turn('size', $(window).width(), $(window).height());
-                }, 150);
+            document.getElementById('btnNext').addEventListener('click', () => {
+                if (hint) hint.style.display = 'none';
+                pageFlip.flipNext();
+            });
+
+            document.getElementById('btnPrev').addEventListener('click', () => {
+                if (hint) hint.style.display = 'none';
+                pageFlip.flipPrev();
             });
         });
     </script>
