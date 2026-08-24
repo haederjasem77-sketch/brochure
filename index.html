@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <title>بروشور المؤتمر</title>
+<!-- مكتبة التقليب الورقي -->
 <script src="https://cdn.jsdelivr.net/npm/page-flip@2.0.7/dist/js/page-flip.browser.js"></script>
 <style>
 * {
@@ -52,7 +53,7 @@ overflow: hidden;
 .page img {
 width: 100%;
 height: 100%;
-object-fit: fill; /* ملء كامل الشاشة */
+object-fit: fill;
 display: block;
 pointer-events: none;
 }
@@ -100,7 +101,7 @@ font-weight: bold;
 direction: ltr;
 }
 
-/* تلميح صغير يظهر لثوانٍ ثم يختفي */
+/* تلميح علوي مؤقت */
 .subtle-hint {
 position: absolute;
 top: 20px;
@@ -127,14 +128,17 @@ animation: fadeOut 3.5s forwards ease-in-out;
 <body>
 
 <div class="book-wrapper">
+<!-- تلميح علوي خفيف -->
 <div class="subtle-hint" id="hint">اسحب للتقليب 👈</div>
 
+<!-- شريط تحكم سفلي شفاف -->
 <div class="bottom-bar">
 <button class="nav-arrow" id="btnNext" title="التالي">‹</button>
 <span class="page-status" id="pageNumber">1 / 6</span>
 <button class="nav-arrow" id="btnPrev" title="السابق">›</button>
 </div>
 
+<!-- الصفحات الورقية المرنة -->
 <div id="flipbook">
 <div class="page" data-density="soft"><img src="1.jpg" alt="الصفحة 1"></div>
 <div class="page" data-density="soft"><img src="2.jpg" alt="الصفحة 2"></div>
@@ -152,12 +156,12 @@ const screenH = window.innerHeight;
 const total = 6;
 const bookContainer = document.getElementById('flipbook');
 
-// صوت انثناء وتقليب ورقة حقيقي وناعم
-const flipSound = new Audio('https://assets.mixkit.co/active_storage/sfx/1104/1104-preview.mp3');
-flipSound.volume = 0.4; // صوت هادئ ومريح
+// استدعاء ملف الصوت المحلي المرفوع في المستودع
+const flipSound = new Audio('flip.mp3');
+flipSound.volume = 0.5;
 flipSound.preload = 'auto';
 
-// تهيئة التقليب الورقي
+// تهيئة التقليب الورقي التفاعلي
 const pageFlip = new St.PageFlip(bookContainer, {
 width: screenW,
 height: screenH,
@@ -181,7 +185,7 @@ pageFlip.loadFromHTML(document.querySelectorAll('.page'));
 const pageNum = document.getElementById('pageNumber');
 const hint = document.getElementById('hint');
 
-// تشغيل حفيف الورقة مع كل تقليب
+// تشغيل الصوت وتحديث العداد عند كل تقليب
 pageFlip.on('flip', (e) => {
 pageNum.innerText = (e.data + 1) + ' / ' + total;
 if (hint) hint.style.display = 'none';
@@ -192,7 +196,7 @@ try {
 } catch (err) {}
 });
 
-// أزرار الشريط
+// أزرار الشريط السفلي
 document.getElementById('btnNext').addEventListener('click', () => {
 pageFlip.flipNext();
 });
@@ -201,7 +205,7 @@ document.getElementById('btnPrev').addEventListener('click', () => {
 pageFlip.flipPrev();
 });
 
-// تحديث الحجم عند تدوير الشاشة
+// تحديث الأبعاد عند تدوير الشاشة
 window.addEventListener('resize', () => {
 pageFlip.updateFromHtml(document.querySelectorAll('.page'));
 });
