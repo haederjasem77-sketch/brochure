@@ -32,7 +32,6 @@
             overflow: hidden;
         }
 
-        /* طبقة اللمس */
         #touch-overlay {
             position: absolute;
             top: 0;
@@ -58,51 +57,22 @@
         #flipbook .page img {
             width: 100%;
             height: 100%;
-            object-fit: fill; /* ملء الشاشة بالكامل */
+            object-fit: fill;
             display: block;
             pointer-events: none;
             -webkit-user-drag: none;
         }
 
-        /* تنبيه إرشادي خفيف يختفي بعد ثوانٍ */
-        .hint-badge {
-            position: absolute;
-            top: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(0, 0, 0, 0.7);
-            color: #ffffff;
-            padding: 6px 16px;
-            border-radius: 20px;
-            font-size: 13px;
-            font-weight: 500;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            pointer-events: none;
-            z-index: 1000;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
-            border: 1px solid rgba(255,255,255,0.2);
-            animation: fadeOutHint 4s forwards ease-in-out;
-        }
-
-        @keyframes fadeOutHint {
-            0% { opacity: 0; }
-            15% { opacity: 1; }
-            80% { opacity: 1; }
-            100% { opacity: 0; visibility: hidden; }
-        }
-
-        /* شريط تحكم نحيف وصغير في أسفل الشاشة */
+        /* شريط تحكم علوي صغير وشبه شفاف لكشف أسفل الصفحة بالكامل */
         .ui-controls {
             position: absolute;
-            bottom: 12px;
+            top: 12px;
             left: 50%;
             transform: translateX(-50%);
             display: flex;
             align-items: center;
             gap: 12px;
-            background: rgba(0, 0, 0, 0.55);
+            background: rgba(0, 0, 0, 0.45);
             backdrop-filter: blur(8px);
             -webkit-backdrop-filter: blur(8px);
             padding: 4px 14px;
@@ -137,13 +107,7 @@
 <body>
 
     <div class="container">
-        <!-- التنبيه التوضيحي في الأعلى -->
-        <div id="hintBadge" class="hint-badge">
-            <span>اسحب الصفحة لتصفح باقي البروشور</span>
-            <span>👈</span>
-        </div>
-
-        <!-- أزرار التنقل السفلية -->
+        <!-- شريط تحكم علوي يترك كافة نصوص الصفحة ساطعة ومقروءة -->
         <div class="ui-controls">
             <button class="ui-btn" id="btnNext">التالي ⬅</button>
             <span class="page-num" id="pageIndicator">1 / 6</span>
@@ -169,19 +133,17 @@
             const $book = $('#flipbook');
             const totalPages = 6;
 
-            // تفعيل العرض كصفحة واحدة بملء الشاشة مع التقليب الورقي
             $book.turn({
                 width: $(window).width(),
                 height: $(window).height(),
                 autoCenter: true,
-                display: 'single', // إجبار المتصفح على عرض صفحة واحدة رأسية دائماً
+                display: 'single',
                 elevation: 50,
                 gradients: true,
                 acceleration: true,
                 duration: 600
             });
 
-            // تحديث العداد
             $book.bind('turned', function(event, page) {
                 $('#pageIndicator').text(page + ' / ' + totalPages);
             });
@@ -191,13 +153,11 @@
             let touchStartTime = 0;
 
             const overlay = document.getElementById('touch-overlay');
-            const hint = document.getElementById('hintBadge');
 
             overlay.addEventListener('touchstart', function(e) {
                 touchStartX = e.touches[0].clientX;
                 touchStartY = e.touches[0].clientY;
                 touchStartTime = Date.now();
-                if (hint) hint.style.display = 'none';
             }, { passive: true });
 
             overlay.addEventListener('touchend', function(e) {
@@ -210,26 +170,23 @@
                 let elapsedTime = Date.now() - touchStartTime;
 
                 if (Math.abs(diffX) > 35 && Math.abs(diffX) > Math.abs(diffY) && elapsedTime < 700) {
-                    if (diffX > 0) {
-                        // سحب نحو اليمين -> تقليب الصفحة التالية (عربي)
+                    if (diffX < 0) {
+                        // سحب من اليمين نحو اليسار -> الانتقال للصفحة التالية
                         $book.turn('next');
                     } else {
-                        // سحب نحو اليسار -> الرجوع للصفحة السابقة
+                        // سحب من اليسار نحو اليمين -> الرجوع للصفحة السابقة
                         $book.turn('previous');
                     }
                 }
             }, { passive: true });
 
-            // الأزرار
             $('#btnNext').on('click', function(e) {
                 e.stopPropagation();
-                if (hint) hint.style.display = 'none';
                 $book.turn('next');
             });
 
             $('#btnPrev').on('click', function(e) {
                 e.stopPropagation();
-                if (hint) hint.style.display = 'none';
                 $book.turn('previous');
             });
 
