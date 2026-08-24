@@ -58,16 +58,16 @@ display: block;
 pointer-events: none;
 }
 
-/* شريط تحكم علوي خفيف وشفاف لا يحجب النصوص */
-.top-bar {
+/* شريط التحكم السفلي الشفاف */
+.bottom-bar {
 position: absolute;
-top: 15px;
+bottom: 15px;
 left: 50%;
 transform: translateX(-50%);
 display: flex;
 align-items: center;
 gap: 12px;
-background: rgba(0, 0, 0, 0.45);
+background: rgba(0, 0, 0, 0.35);
 backdrop-filter: blur(8px);
 -webkit-backdrop-filter: blur(8px);
 padding: 5px 14px;
@@ -101,10 +101,10 @@ font-weight: bold;
 direction: ltr;
 }
 
-/* تلميح صغير جداً يظهر في أعلى الشاشة لثوانٍ ثم يختفي */
+/* تلميح صغير يظهر لثوانٍ ثم يختفي */
 .subtle-hint {
 position: absolute;
-top: 60px;
+top: 20px;
 left: 50%;
 transform: translateX(-50%);
 background: rgba(0, 0, 0, 0.6);
@@ -128,15 +128,15 @@ animation: fadeOut 3.5s forwards ease-in-out;
 <body>
 
 <div class="book-wrapper">
-<!-- شريط علوي أنيق وصغير -->
-<div class="top-bar">
+<!-- تلميح علوي خفيف ومؤقت -->
+<div class="subtle-hint" id="hint">اسحب للتقليب 👈</div>
+
+<!-- شريط تحكم شفاف أسفل الصورة -->
+<div class="bottom-bar">
 <button class="nav-arrow" id="btnNext" title="التالي">‹</button>
 <span class="page-status" id="pageNumber">1 / 6</span>
 <button class="nav-arrow" id="btnPrev" title="السابق">›</button>
 </div>
-
-<!-- تلميح علوي خفيف ومؤقت -->
-<div class="subtle-hint" id="hint">اسحب للتقليب 👈</div>
 
 <!-- الصفحات مع خاصية الورق المرن soft -->
 <div id="flipbook">
@@ -156,7 +156,7 @@ const screenH = window.innerHeight;
 const total = 6;
 const bookContainer = document.getElementById('flipbook');
 
-// تهيئة التقليب الورقي الحقيقي
+// تهيئة التقليب الورقي
 const pageFlip = new St.PageFlip(bookContainer, {
 width: screenW,
 height: screenH,
@@ -166,13 +166,13 @@ maxWidth: 1600,
 minHeight: 300,
 maxHeight: 2500,
 maxShadowOpacity: 0.5,
-showCover: false, // معاملة كل الصفحات كورق مرن
+showCover: false,
 usePortrait: true,
 mobileScrollSupport: false,
 flippingTime: 700,
 useMouseEvents: true,
 swipeDistance: 25,
-direction: 'rtl' // التقليب من اليمين لليسار
+direction: 'rtl'
 });
 
 pageFlip.loadFromHTML(document.querySelectorAll('.page'));
@@ -180,13 +180,13 @@ pageFlip.loadFromHTML(document.querySelectorAll('.page'));
 const pageNum = document.getElementById('pageNumber');
 const hint = document.getElementById('hint');
 
-// تحديث رقم الصفحة بعد تصحيح صيغة النص البرمجية
+// تحديث رقم الصفحة
 pageFlip.on('flip', (e) => {
 pageNum.innerText = (e.data + 1) + ' / ' + total;
 if (hint) hint.style.display = 'none';
 });
 
-// أزرار الشريط العلوي
+// أزرار الشريط
 document.getElementById('btnNext').addEventListener('click', () => {
 pageFlip.flipNext();
 });
@@ -195,7 +195,7 @@ document.getElementById('btnPrev').addEventListener('click', () => {
 pageFlip.flipPrev();
 });
 
-// تحديث الحجم تلقائياً عند تدوير الشاشة
+// تحديث الحجم عند تدوير الشاشة
 window.addEventListener('resize', () => {
 pageFlip.updateFromHtml(document.querySelectorAll('.page'));
 });
