@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <title>بروشور المؤتمر</title>
-<!-- مكتبة التقليب الورقي -->
+<!-- مكتبة التقليب الورقي التفاعلي -->
 <script src="https://cdn.jsdelivr.net/npm/page-flip@2.0.7/dist/js/page-flip.browser.js"></script>
 <style>
 * {
@@ -128,7 +128,6 @@ animation: fadeOut 3.5s forwards ease-in-out;
 <body>
 
 <div class="book-wrapper">
-<!-- تلميح علوي خفيف -->
 <div class="subtle-hint" id="hint">اسحب للتقليب 👈</div>
 
 <!-- شريط تحكم سفلي شفاف -->
@@ -138,7 +137,7 @@ animation: fadeOut 3.5s forwards ease-in-out;
 <button class="nav-arrow" id="btnPrev" title="السابق">›</button>
 </div>
 
-<!-- الصفحات الورقية المرنة -->
+<!-- الصفحات الورقية -->
 <div id="flipbook">
 <div class="page" data-density="soft"><img src="1.jpg" alt="الصفحة 1"></div>
 <div class="page" data-density="soft"><img src="2.jpg" alt="الصفحة 2"></div>
@@ -156,12 +155,29 @@ const screenH = window.innerHeight;
 const total = 6;
 const bookContainer = document.getElementById('flipbook');
 
-// استدعاء ملف الصوت المحلي المرفوع في المستودع
+// تجهيز الصوت وقص الفراغ الصامت
 const flipSound = new Audio('flip.mp3');
-flipSound.volume = 0.5;
+flipSound.volume = 0.6;
 flipSound.preload = 'auto';
 
-// تهيئة التقليب الورقي التفاعلي
+const START_OFFSET = 0.20; // تخطي أول 0.20 ثانية (الفراغ الصامت في البداية)
+const PLAY_DURATION = 500; // تشغيل الصوت لمدة نصف ثانية فقط (مدة حركة الورقة)
+let soundTimer = null;
+
+function playTrimmedSound() {
+    try {
+        clearTimeout(soundTimer);
+        flipSound.pause();
+        flipSound.currentTime = START_OFFSET;
+        flipSound.play().catch(() => {});
+
+        // إيقاف الصوت تلقائياً بمجرد انتهاء حركة انثناء الصفحة
+        soundTimer = setTimeout(() => {
+            flipSound.pause();
+        }, PLAY_DURATION);
+    } catch (err) {}
+}
+
 const pageFlip = new St.PageFlip(bookContainer, {
 width: screenW,
 height: screenH,
@@ -185,29 +201,30 @@ pageFlip.loadFromHTML(document.querySelectorAll('.page'));
 const pageNum = document.getElementById('pageNumber');
 const hint = document.getElementById('hint');
 
-// تشغيل الصوت وتحديث العداد عند كل تقليب
-pageFlip.on('flip', (e) => {
-pageNum.innerText = (e.data + 1) + ' / ' + total;
-if (hint) hint.style.display = 'none';
-
-try {
-    flipSound.currentTime = 0;
-    flipSound.play().catch(() => {});
-} catch (err) {}
+// تشغيل الصوت فور بدء لمس وسحب الورقة
+pageFlip.on('changeState', (e) => {
+    if (e.data === 'flipping') {
+        playTrimmedSound();
+    }
 });
 
-// أزرار الشريط السفلي
+// تحديث العداد
+pageFlip.on('flip', (e) => {
+    pageNum.innerText = (e.data + 1) + ' / ' + total;
+    if (hint) hint.style.display = 'none';
+});
+
+// أزرار التحكم
 document.getElementById('btnNext').addEventListener('click', () => {
-pageFlip.flipNext();
+    pageFlip.flipNext();
 });
 
 document.getElementById('btnPrev').addEventListener('click', () => {
-pageFlip.flipPrev();
+    pageFlip.flipPrev();
 });
 
-// تحديث الأبعاد عند تدوير الشاشة
 window.addEventListener('resize', () => {
-pageFlip.updateFromHtml(document.querySelectorAll('.page'));
+    pageFlip.updateFromHtml(document.querySelectorAll('.page'));
 });
 });
 </script>
