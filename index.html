@@ -4,7 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <title>بروشور المؤتمر</title>
-<!-- مكتبة التقليب الورقي التفاعلي -->
 <script src="https://cdn.jsdelivr.net/npm/page-flip@2.0.7/dist/js/page-flip.browser.js"></script>
 <style>
 * {
@@ -128,17 +127,14 @@ animation: fadeOut 3.5s forwards ease-in-out;
 <body>
 
 <div class="book-wrapper">
-<!-- تلميح علوي خفيف ومؤقت -->
 <div class="subtle-hint" id="hint">اسحب للتقليب 👈</div>
 
-<!-- شريط تحكم شفاف أسفل الصورة -->
 <div class="bottom-bar">
 <button class="nav-arrow" id="btnNext" title="التالي">‹</button>
 <span class="page-status" id="pageNumber">1 / 6</span>
 <button class="nav-arrow" id="btnPrev" title="السابق">›</button>
 </div>
 
-<!-- الصفحات مع خاصية الورق المرن soft -->
 <div id="flipbook">
 <div class="page" data-density="soft"><img src="1.jpg" alt="الصفحة 1"></div>
 <div class="page" data-density="soft"><img src="2.jpg" alt="الصفحة 2"></div>
@@ -155,6 +151,10 @@ const screenW = window.innerWidth;
 const screenH = window.innerHeight;
 const total = 6;
 const bookContainer = document.getElementById('flipbook');
+
+// تجهيز الصوت التفاعلي للورق
+const flipSound = new Audio('https://assets.mixkit.co/active_storage/sfx/2405/2405-preview.mp3');
+flipSound.preload = 'auto';
 
 // تهيئة التقليب الورقي
 const pageFlip = new St.PageFlip(bookContainer, {
@@ -180,10 +180,16 @@ pageFlip.loadFromHTML(document.querySelectorAll('.page'));
 const pageNum = document.getElementById('pageNumber');
 const hint = document.getElementById('hint');
 
-// تحديث رقم الصفحة
+// تشغيل الصوت وتحديث رقم الصفحة مع كل تقليب
 pageFlip.on('flip', (e) => {
 pageNum.innerText = (e.data + 1) + ' / ' + total;
 if (hint) hint.style.display = 'none';
+
+// إعادة تشغيل صوت انثناء الورقة
+try {
+    flipSound.currentTime = 0;
+    flipSound.play().catch(() => {});
+} catch (err) {}
 });
 
 // أزرار الشريط
