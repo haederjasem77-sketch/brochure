@@ -130,7 +130,7 @@ animation: fadeOut 3.5s forwards ease-in-out;
 <div class="book-wrapper">
 <div class="subtle-hint" id="hint">اسحب للتقليب 👈</div>
 
-<!-- شريط تحكم سفلي شفاف -->
+<!-- شريط تحكم شفاف أسفل الصورة -->
 <div class="bottom-bar">
 <button class="nav-arrow" id="btnNext" title="التالي">‹</button>
 <span class="page-status" id="pageNumber">1 / 6</span>
@@ -155,26 +155,15 @@ const screenH = window.innerHeight;
 const total = 6;
 const bookContainer = document.getElementById('flipbook');
 
-// تجهيز الصوت وقص الفراغ الصامت
+// استدعاء ملف الصوت الجديد
 const flipSound = new Audio('flip.mp3');
 flipSound.volume = 0.6;
 flipSound.preload = 'auto';
 
-const START_OFFSET = 0.20; // تخطي أول 0.20 ثانية (الفراغ الصامت في البداية)
-const PLAY_DURATION = 500; // تشغيل الصوت لمدة نصف ثانية فقط (مدة حركة الورقة)
-let soundTimer = null;
-
-function playTrimmedSound() {
+function playSound() {
     try {
-        clearTimeout(soundTimer);
-        flipSound.pause();
-        flipSound.currentTime = START_OFFSET;
+        flipSound.currentTime = 0;
         flipSound.play().catch(() => {});
-
-        // إيقاف الصوت تلقائياً بمجرد انتهاء حركة انثناء الصفحة
-        soundTimer = setTimeout(() => {
-            flipSound.pause();
-        }, PLAY_DURATION);
     } catch (err) {}
 }
 
@@ -201,10 +190,10 @@ pageFlip.loadFromHTML(document.querySelectorAll('.page'));
 const pageNum = document.getElementById('pageNumber');
 const hint = document.getElementById('hint');
 
-// تشغيل الصوت فور بدء لمس وسحب الورقة
+// تشغيل الصوت فور بدء حركة الورقة
 pageFlip.on('changeState', (e) => {
     if (e.data === 'flipping') {
-        playTrimmedSound();
+        playSound();
     }
 });
 
@@ -214,7 +203,7 @@ pageFlip.on('flip', (e) => {
     if (hint) hint.style.display = 'none';
 });
 
-// أزرار التحكم
+// أزرار الشريط
 document.getElementById('btnNext').addEventListener('click', () => {
     pageFlip.flipNext();
 });
