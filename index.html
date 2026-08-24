@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>بروشور المؤتمر</title>
-    <script src="page-flip.browser.js"></script>
     <style>
         * {
             box-sizing: border-box;
@@ -21,66 +20,99 @@
             overflow: hidden;
             background-color: #000;
             position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
             font-family: system-ui, -apple-system, sans-serif;
         }
 
-        /* إجبار حاوية العرض وجميع طبقات المكتبة على ملء الشاشة 100% */
-        .book-wrapper, #flipbook, .stf__parent, .stf__wrapper, .stf__block {
-            width: 100vw !important;
-            height: 100vh !important;
-            height: 100dvh !important;
-            margin: 0 !important;
-            padding: 0 !important;
-            position: absolute !important;
-            top: 0 !important;
-            left: 0 !important;
-            overflow: hidden !important;
+        /* حاوية العرض ثلاثية الأبعاد بملء الشاشة */
+        .stage {
+            width: 100vw;
+            height: 100vh;
+            height: 100dvh;
+            position: relative;
+            perspective: 2200px;
+            overflow: hidden;
+            background-color: #000;
         }
 
-        .page, .stf__item {
-            width: 100% !important;
-            height: 100% !important;
-            background-color: #000 !important;
-            overflow: hidden !important;
+        .flipbook {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            transform-style: preserve-3d;
+        }
+
+        /* تصميم الصفحة وانثناء الورقة العربية */
+        .page {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            height: 100dvh;
+            transform-origin: right center; /* كعب الكتاب في جهة اليمين */
+            transform-style: preserve-3d;
+            transition: transform 0.85s cubic-bezier(0.25, 1, 0.5, 1), box-shadow 0.85s ease;
+            backface-visibility: hidden;
+            -webkit-backface-visibility: hidden;
+            background-color: #000;
         }
 
         .page img {
-            width: 100% !important;
-            height: 100% !important;
-            object-fit: fill !important; /* تمدد كامل على مقاس الشاشة */
-            display: block !important;
+            width: 100%;
+            height: 100%;
+            object-fit: fill; /* ملء كامل الشاشة */
+            display: block;
             pointer-events: none;
         }
 
-        /* شريط علوي خفيف لا يغطي محتوى البروشور */
-        .top-bar {
+        /* ظل انثناء الورقة الطبيعي أثناء الحركة */
+        .page::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(to left, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.1) 40%, transparent 100%);
+            opacity: 0;
+            transition: opacity 0.85s ease;
+            pointer-events: none;
+        }
+
+        /* حالة الصفحة بعد التقليب للأمام */
+        .page.turned {
+            transform: rotateY(180deg);
+            pointer-events: none;
+            visibility: hidden;
+            transition: transform 0.85s cubic-bezier(0.25, 1, 0.5, 1), visibility 0s 0.85s;
+        }
+
+        .page.turning::after {
+            opacity: 1;
+        }
+
+        /* شريط تحكم سفلي أنيق ونحيف جداً لا يغطي أي نص */
+        .bottom-bar {
             position: fixed;
-            top: 12px;
+            bottom: 12px;
             left: 50%;
             transform: translateX(-50%);
             display: flex;
             align-items: center;
-            gap: 14px;
-            background: rgba(0, 0, 0, 0.55);
+            gap: 12px;
+            background: rgba(0, 0, 0, 0.5);
             backdrop-filter: blur(8px);
             -webkit-backdrop-filter: blur(8px);
-            padding: 5px 16px;
+            padding: 4px 14px;
             border-radius: 20px;
             border: 1px solid rgba(255, 255, 255, 0.2);
-            z-index: 99999;
+            z-index: 9999;
         }
 
         .nav-btn {
             background: rgba(255, 255, 255, 0.2);
             border: none;
             color: #fff;
-            padding: 3px 12px;
-            border-radius: 12px;
-            font-size: 13px;
+            padding: 4px 12px;
+            border-radius: 14px;
+            font-size: 12px;
             font-weight: bold;
             cursor: pointer;
         }
@@ -90,29 +122,31 @@
         }
 
         .page-status {
-            color: #ffffff;
-            font-size: 13px;
+            color: #fff;
+            font-size: 12px;
             font-weight: bold;
             direction: ltr;
+            min-width: 40px;
+            text-align: center;
         }
 
-        /* تلميح إرشادي متحرك */
-        .subtle-hint {
+        /* تنبيه إرشادي خفيف يختفي تلقائياً */
+        .hint {
             position: fixed;
-            top: 55px;
+            top: 20px;
             left: 50%;
             transform: translateX(-50%);
-            background: rgba(0, 0, 0, 0.75);
+            background: rgba(0, 0, 0, 0.7);
             color: #fff;
             font-size: 12px;
             padding: 5px 14px;
             border-radius: 15px;
             pointer-events: none;
-            z-index: 99998;
+            z-index: 9998;
             display: flex;
             align-items: center;
             gap: 6px;
-            animation: fadeOut 4s forwards ease-in-out;
+            animation: fadeOut 3.5s forwards ease-in-out;
             border: 1px solid rgba(255, 255, 255, 0.15);
         }
 
@@ -126,80 +160,106 @@
 </head>
 <body>
 
-    <div class="book-wrapper">
-        <!-- شريط التحكم العلوي -->
-        <div class="top-bar">
-            <button class="nav-btn" id="btnNext">التالي ⬅</button>
-            <span class="page-status" id="pageNumber">1 / 6</span>
-            <button class="nav-btn" id="btnPrev">➡ السابق</button>
-        </div>
-
-        <!-- التلميح التوضيحي -->
-        <div class="subtle-hint" id="hint">
-            <span>اسحب من اليسار لليمين للتقليب</span>
+    <div class="stage" id="touchArea">
+        <!-- تلميح السحب -->
+        <div class="hint" id="hint">
+            <span>اسحب من اليسار لليمين للتصفح</span>
             <span>👉</span>
         </div>
 
-        <!-- الصفحات الورقية -->
-        <div id="flipbook">
-            <div class="page" data-density="soft"><img src="1.jpg" alt="1"></div>
-            <div class="page" data-density="soft"><img src="2.jpg" alt="2"></div>
-            <div class="page" data-density="soft"><img src="3.jpg" alt="3"></div>
-            <div class="page" data-density="soft"><img src="4.jpg" alt="4"></div>
-            <div class="page" data-density="soft"><img src="5.jpg" alt="5"></div>
-            <div class="page" data-density="soft"><img src="6.jpg" alt="6"></div>
+        <!-- الصفحات مرتبة حسب الترتيب الصحيح للأعلى -->
+        <div class="flipbook">
+            <div class="page" id="p1" style="z-index: 6;"><img src="1.jpg" alt="1"></div>
+            <div class="page" id="p2" style="z-index: 5;"><img src="2.jpg" alt="2"></div>
+            <div class="page" id="p3" style="z-index: 4;"><img src="3.jpg" alt="3"></div>
+            <div class="page" id="p4" style="z-index: 3;"><img src="4.jpg" alt="4"></div>
+            <div class="page" id="p5" style="z-index: 2;"><img src="5.jpg" alt="5"></div>
+            <div class="page" id="p6" style="z-index: 1;"><img src="6.jpg" alt="6"></div>
+        </div>
+
+        <!-- شريط الأزرار في الأسفل -->
+        <div class="bottom-bar">
+            <button class="nav-btn" id="btnNext">التالي ⬅</button>
+            <span class="page-status" id="pageIndicator">1 / 6</span>
+            <button class="nav-btn" id="btnPrev">➡ السابق</button>
         </div>
     </div>
 
     <script>
-        window.addEventListener('DOMContentLoaded', () => {
-            const screenW = window.innerWidth;
-            const screenH = window.innerHeight;
-            const total = 6;
-            const bookContainer = document.getElementById('flipbook');
+        document.addEventListener('DOMContentLoaded', () => {
+            const pages = [
+                document.getElementById('p1'),
+                document.getElementById('p2'),
+                document.getElementById('p3'),
+                document.getElementById('p4'),
+                document.getElementById('p5'),
+                document.getElementById('p6')
+            ];
+            const total = pages.length;
+            let current = 0; // الصفحة الحالية (0 إلى 5)
 
-            const pageFlip = new St.PageFlip(bookContainer, {
-                width: screenW,
-                height: screenH,
-                size: "stretch",
-                minWidth: 100,
-                maxWidth: 4000,
-                minHeight: 100,
-                maxHeight: 4000,
-                maxShadowOpacity: 0.6,
-                showCover: false,
-                usePortrait: true,
-                mobileScrollSupport: false,
-                flippingTime: 800,
-                useMouseEvents: true,
-                swipeDistance: 20,
-                drawShadow: true,
-                direction: 'rtl'
-            });
-
-            pageFlip.loadFromHTML(document.querySelectorAll('.page'));
-
-            const pageNum = document.getElementById('pageNumber');
+            const indicator = document.getElementById('pageIndicator');
             const hint = document.getElementById('hint');
 
-            pageFlip.on('flip', (e) => {
-                pageNum.innerText = `${e.data + 1} / ${total}`;
+            function updateUI() {
+                indicator.innerText = `${current + 1} / ${total}`;
                 if (hint) hint.style.display = 'none';
+            }
+
+            function goNext() {
+                if (current < total - 1) {
+                    pages[current].classList.add('turning');
+                    pages[current].classList.add('turned');
+                    current++;
+                    updateUI();
+                }
+            }
+
+            function goPrev() {
+                if (current > 0) {
+                    current--;
+                    pages[current].classList.remove('turned');
+                    updateUI();
+                }
+            }
+
+            document.getElementById('btnNext').addEventListener('click', (e) => {
+                e.stopPropagation();
+                goNext();
             });
 
-            document.getElementById('btnNext').addEventListener('click', () => {
-                if (hint) hint.style.display = 'none';
-                pageFlip.flipNext('bottom');
+            document.getElementById('btnPrev').addEventListener('click', (e) => {
+                e.stopPropagation();
+                goPrev();
             });
 
-            document.getElementById('btnPrev').addEventListener('click', () => {
-                if (hint) hint.style.display = 'none';
-                pageFlip.flipPrev('bottom');
-            });
+            // إيماءات اللمس والسحب (Swipe)
+            let startX = 0;
+            let startY = 0;
+            let startTime = 0;
+            const touchArea = document.getElementById('touchArea');
 
-            window.addEventListener('resize', () => {
-                pageFlip.updateFromHtml(document.querySelectorAll('.page'));
-            });
+            touchArea.addEventListener('touchstart', (e) => {
+                startX = e.touches[0].clientX;
+                startY = e.touches[0].clientY;
+                startTime = Date.now();
+            }, { passive: true });
+
+            touchArea.addEventListener('touchend', (e) => {
+                const diffX = e.changedTouches[0].clientX - startX;
+                const diffY = e.changedTouches[0].clientY - startY;
+                const duration = Date.now() - startTime;
+
+                if (Math.abs(diffX) > 30 && Math.abs(diffX) > Math.abs(diffY) && duration < 600) {
+                    if (diffX > 0) {
+                        // سحب نحو اليمين -> فتح الصفحة التالية للأمام
+                        goNext();
+                    } else {
+                        // سحب نحو اليسار -> الرجوع للصفحة السابقة
+                        goPrev();
+                    }
+                }
+            }, { passive: true });
         });
     </script>
 </body>
