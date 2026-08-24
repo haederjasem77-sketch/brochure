@@ -4,8 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>بروشور المؤتمر</title>
-    <!-- مكتبة التقليب الورقي التفاعلي -->
-    <script src="https://cdn.jsdelivr.net/npm/page-flip@2.0.7/dist/js/page-flip.browser.js"></script>
+    <script src="page-flip.browser.js"></script>
     <style>
         * {
             box-sizing: border-box;
@@ -16,82 +15,78 @@
         }
 
         html, body {
-            width: 100%;
-            height: 100%;
-            overflow: hidden;
-            background-color: #000;
-            position: fixed;
-            font-family: system-ui, -apple-system, sans-serif;
-        }
-
-        /* حاوية العرض بملء الشاشة */
-        .book-wrapper {
             width: 100vw;
             height: 100vh;
             height: 100dvh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            position: relative;
-            background: #000;
             overflow: hidden;
-        }
-
-        #flipbook {
-            width: 100%;
-            height: 100%;
-        }
-
-        /* تصميم الصفحات الورقية */
-        .page {
-            width: 100%;
-            height: 100%;
             background-color: #000;
-            overflow: hidden;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            font-family: system-ui, -apple-system, sans-serif;
+        }
+
+        /* إجبار حاوية العرض وجميع طبقات المكتبة على ملء الشاشة 100% */
+        .book-wrapper, #flipbook, .stf__parent, .stf__wrapper, .stf__block {
+            width: 100vw !important;
+            height: 100vh !important;
+            height: 100dvh !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            position: absolute !important;
+            top: 0 !important;
+            left: 0 !important;
+            overflow: hidden !important;
+        }
+
+        .page, .stf__item {
+            width: 100% !important;
+            height: 100% !important;
+            background-color: #000 !important;
+            overflow: hidden !important;
         }
 
         .page img {
-            width: 100%;
-            height: 100%;
-            object-fit: fill; /* ملء كامل الشاشة */
-            display: block;
+            width: 100% !important;
+            height: 100% !important;
+            object-fit: fill !important; /* تمدد كامل على مقاس الشاشة */
+            display: block !important;
             pointer-events: none;
         }
 
-        /* شريط تحكم علوي خفيف وشفاف لا يحجب النصوص */
+        /* شريط علوي خفيف لا يغطي محتوى البروشور */
         .top-bar {
-            position: absolute;
-            top: 15px;
+            position: fixed;
+            top: 12px;
             left: 50%;
             transform: translateX(-50%);
             display: flex;
             align-items: center;
-            gap: 12px;
-            background: rgba(0, 0, 0, 0.45);
+            gap: 14px;
+            background: rgba(0, 0, 0, 0.55);
             backdrop-filter: blur(8px);
             -webkit-backdrop-filter: blur(8px);
-            padding: 5px 14px;
+            padding: 5px 16px;
             border-radius: 20px;
             border: 1px solid rgba(255, 255, 255, 0.2);
-            z-index: 1000;
+            z-index: 99999;
         }
 
-        .nav-arrow {
+        .nav-btn {
             background: rgba(255, 255, 255, 0.2);
             border: none;
             color: #fff;
-            width: 28px;
-            height: 28px;
-            border-radius: 50%;
-            font-size: 14px;
+            padding: 3px 12px;
+            border-radius: 12px;
+            font-size: 13px;
+            font-weight: bold;
             cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
         }
 
-        .nav-arrow:active {
-            background: rgba(255, 255, 255, 0.5);
+        .nav-btn:active {
+            background: rgba(255, 255, 255, 0.45);
         }
 
         .page-status {
@@ -101,20 +96,24 @@
             direction: ltr;
         }
 
-        /* تلميح صغير جداً يظهر في أعلى الشاشة لثوانٍ ثم يختفي */
+        /* تلميح إرشادي متحرك */
         .subtle-hint {
-            position: absolute;
-            top: 60px;
+            position: fixed;
+            top: 55px;
             left: 50%;
             transform: translateX(-50%);
-            background: rgba(0, 0, 0, 0.6);
+            background: rgba(0, 0, 0, 0.75);
             color: #fff;
             font-size: 12px;
-            padding: 4px 12px;
-            border-radius: 12px;
+            padding: 5px 14px;
+            border-radius: 15px;
             pointer-events: none;
-            z-index: 999;
-            animation: fadeOut 3.5s forwards ease-in-out;
+            z-index: 99998;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            animation: fadeOut 4s forwards ease-in-out;
+            border: 1px solid rgba(255, 255, 255, 0.15);
         }
 
         @keyframes fadeOut {
@@ -128,24 +127,27 @@
 <body>
 
     <div class="book-wrapper">
-        <!-- شريط علوي أنيق وصغير -->
+        <!-- شريط التحكم العلوي -->
         <div class="top-bar">
-            <button class="nav-arrow" id="btnNext" title="التالي">‹</button>
+            <button class="nav-btn" id="btnNext">التالي ⬅</button>
             <span class="page-status" id="pageNumber">1 / 6</span>
-            <button class="nav-arrow" id="btnPrev" title="السابق">›</button>
+            <button class="nav-btn" id="btnPrev">➡ السابق</button>
         </div>
 
-        <!-- تلميح علوي خفيف ومؤقت -->
-        <div class="subtle-hint" id="hint">اسحب للتقليب 👈</div>
+        <!-- التلميح التوضيحي -->
+        <div class="subtle-hint" id="hint">
+            <span>اسحب من اليسار لليمين للتقليب</span>
+            <span>👉</span>
+        </div>
 
-        <!-- الصفحات مع خاصية الورق المرن soft -->
+        <!-- الصفحات الورقية -->
         <div id="flipbook">
-            <div class="page" data-density="soft"><img src="1.jpg" alt="الصفحة 1"></div>
-            <div class="page" data-density="soft"><img src="2.jpg" alt="الصفحة 2"></div>
-            <div class="page" data-density="soft"><img src="3.jpg" alt="الصفحة 3"></div>
-            <div class="page" data-density="soft"><img src="4.jpg" alt="الصفحة 4"></div>
-            <div class="page" data-density="soft"><img src="5.jpg" alt="الصفحة 5"></div>
-            <div class="page" data-density="soft"><img src="6.jpg" alt="الصفحة 6"></div>
+            <div class="page" data-density="soft"><img src="1.jpg" alt="1"></div>
+            <div class="page" data-density="soft"><img src="2.jpg" alt="2"></div>
+            <div class="page" data-density="soft"><img src="3.jpg" alt="3"></div>
+            <div class="page" data-density="soft"><img src="4.jpg" alt="4"></div>
+            <div class="page" data-density="soft"><img src="5.jpg" alt="5"></div>
+            <div class="page" data-density="soft"><img src="6.jpg" alt="6"></div>
         </div>
     </div>
 
@@ -156,23 +158,23 @@
             const total = 6;
             const bookContainer = document.getElementById('flipbook');
 
-            // تهيئة التقليب الورقي الحقيقي
             const pageFlip = new St.PageFlip(bookContainer, {
                 width: screenW,
                 height: screenH,
                 size: "stretch",
-                minWidth: 200,
-                maxWidth: 1600,
-                minHeight: 300,
-                maxHeight: 2500,
-                maxShadowOpacity: 0.5,
-                showCover: false, // معاملة كل الصفحات كورق مرن
+                minWidth: 100,
+                maxWidth: 4000,
+                minHeight: 100,
+                maxHeight: 4000,
+                maxShadowOpacity: 0.6,
+                showCover: false,
                 usePortrait: true,
                 mobileScrollSupport: false,
-                flippingTime: 700,
+                flippingTime: 800,
                 useMouseEvents: true,
-                swipeDistance: 25,
-                direction: 'rtl' // التقليب من اليمين لليسار
+                swipeDistance: 20,
+                drawShadow: true,
+                direction: 'rtl'
             });
 
             pageFlip.loadFromHTML(document.querySelectorAll('.page'));
@@ -180,22 +182,21 @@
             const pageNum = document.getElementById('pageNumber');
             const hint = document.getElementById('hint');
 
-            // تحديث رقم الصفحة
             pageFlip.on('flip', (e) => {
                 pageNum.innerText = `${e.data + 1} / ${total}`;
                 if (hint) hint.style.display = 'none';
             });
 
-            // أزرار الشريط العلوي
             document.getElementById('btnNext').addEventListener('click', () => {
-                pageFlip.flipNext();
+                if (hint) hint.style.display = 'none';
+                pageFlip.flipNext('bottom');
             });
 
             document.getElementById('btnPrev').addEventListener('click', () => {
-                pageFlip.flipPrev();
+                if (hint) hint.style.display = 'none';
+                pageFlip.flipPrev('bottom');
             });
 
-            // تحديث الحجم تلقائياً عند تدوير الشاشة
             window.addEventListener('resize', () => {
                 pageFlip.updateFromHtml(document.querySelectorAll('.page'));
             });
