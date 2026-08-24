@@ -152,8 +152,9 @@ const screenH = window.innerHeight;
 const total = 6;
 const bookContainer = document.getElementById('flipbook');
 
-// تجهيز الصوت التفاعلي للورق
-const flipSound = new Audio('https://assets.mixkit.co/active_storage/sfx/2405/2405-preview.mp3');
+// صوت انثناء وتقليب ورقة حقيقي وناعم
+const flipSound = new Audio('https://assets.mixkit.co/active_storage/sfx/1104/1104-preview.mp3');
+flipSound.volume = 0.4; // صوت هادئ ومريح
 flipSound.preload = 'auto';
 
 // تهيئة التقليب الورقي
@@ -180,12 +181,11 @@ pageFlip.loadFromHTML(document.querySelectorAll('.page'));
 const pageNum = document.getElementById('pageNumber');
 const hint = document.getElementById('hint');
 
-// تشغيل الصوت وتحديث رقم الصفحة مع كل تقليب
+// تشغيل حفيف الورقة مع كل تقليب
 pageFlip.on('flip', (e) => {
 pageNum.innerText = (e.data + 1) + ' / ' + total;
 if (hint) hint.style.display = 'none';
 
-// إعادة تشغيل صوت انثناء الورقة
 try {
     flipSound.currentTime = 0;
     flipSound.play().catch(() => {});
