@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>بروشور</title>
+<script src="https://cdn.jsdelivr.net/npm/page-flip@2.0.7/dist/js/page-flip.browser.js"></script>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-user-select: none; }
+html, body { width: 100%; height: 100%; overflow: hidden; background-color: #000; position: fixed; font-family: system-ui, -apple-system, sans-serif; }
+.book-wrapper { width: 100vw; height: 100vh; height: 100dvh; display: flex; justify-content: center; align-items: center; position: relative; background: #000; overflow: hidden; }
+#flipbook { width: 100%; height: 100%; }
+.page { width: 100%; height: 100%; background-color: #000; overflow: hidden; }
+.page img { width: 100%; height: 100%; object-fit: fill; display: block; pointer-events: none; }
+.bottom-bar { position: absolute; bottom: 15px; left: 50%; transform: translateX(-50%); display: flex; align-items: center; gap: 12px; background: rgba(0, 0, 0, 0.35); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); padding: 5px 14px; border-radius: 20px; border: 1px solid rgba(255, 255, 255, 0.2); z-index: 1000; }
+.nav-arrow { background: rgba(255, 255, 255, 0.2); border: none; color: #fff; width: 28px; height: 28px; border-radius: 50%; font-size: 14px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+.nav-arrow:active { background: rgba(255, 255, 255, 0.5); }
+.page-status { color: #ffffff; font-size: 13px; font-weight: bold; direction: ltr; }
+.subtle-hint { position: absolute; top: 20px; left: 50%; transform: translateX(-50%); background: rgba(0, 0, 0, 0.6); color: #fff; font-size: 12px; padding: 4px 12px; border-radius: 12px; pointer-events: none; z-index: 999; animation: fadeOut 3.5s forwards ease-in-out; }
+@keyframes fadeOut { 0% { opacity: 0; } 20% { opacity: 1; } 80% { opacity: 1; } 100% { opacity: 0; visibility: hidden; } }
+</style>
+</head>
+<body>
+<div class="book-wrapper">
+<div class="subtle-hint" id="hint">اسحب للتقليب 👈</div>
+<div class="bottom-bar">
+<button class="nav-arrow" id="btnNext" title="التالي">‹</button>
+<span class="page-status" id="pageNumber">1 / 6</span>
+<button class="nav-arrow" id="btnPrev" title="السابق">›</button>
+</div>
+<div id="flipbook">
+<div class="page" data-density="soft"><img src="1.jpg" alt="الصفحة 1"></div>
+<div class="page" data-density="soft"><img src="2.jpg" alt="الصفحة 2"></div>
+<div class="page" data-density="soft"><img src="3.jpg" alt="الصفحة 3"></div>
+<div class="page" data-density="soft"><img src="4.jpg" alt="الصفحة 4"></div>
+<div class="page" data-density="soft"><img src="5.jpg" alt="الصفحة 5"></div>
+<div class="page" data-density="soft"><img src="6.jpg" alt="الصفحة 6"></div>
+</div>
+</div>
+<script>
+window.addEventListener('DOMContentLoaded', () => {
+const screenW = window.innerWidth;
+const screenH = window.innerHeight;
+const total = 6;
+const bookContainer = document.getElementById('flipbook');
+const flipSound = new Audio('flip.mp3');
+flipSound.volume = 0.6;
+flipSound.preload = 'auto';
+
+function playSound() {
+    try {
+        flipSound.currentTime = 0;
+        flipSound.play().catch(() => {});
+    } catch (err) {}
+}
+
+const pageFlip = new St.PageFlip(bookContainer, {
+width: screenW, height: screenH, size: "stretch",
+minWidth: 200, maxWidth: 1600, minHeight: 300, maxHeight: 2500,
+maxShadowOpacity: 0.5, showCover: false, usePortrait: true,
+mobileScrollSupport: false, flippingTime: 700, useMouseEvents: true,
+swipeDistance: 25, direction: 'rtl'
+});
+
+pageFlip.loadFromHTML(document.querySelectorAll('.page'));
+const pageNum = document.getElementById('pageNumber');
+const hint = document.getElementById('hint');
+
+pageFlip.on('changeState', (e) => {
+    if (e.data === 'flipping') playSound();
+});
+
+pageFlip.on('flip', (e) => {
+    pageNum.innerText = (e.data + 1) + ' / ' + total;
+    if (hint) hint.style.display = 'none';
+});
+
+document.getElementById('btnNext').addEventListener('click', () => pageFlip.flipNext());
+document.getElementById('btnPrev').addEventListener('click', () => pageFlip.flipPrev());
+window.addEventListener('resize', () => pageFlip.updateFromHtml(document.querySelectorAll('.page')));
+});
+</script>
+</body>
+</html>
