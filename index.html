@@ -24,7 +24,7 @@ html, body {
   font-family: system-ui, -apple-system, sans-serif;
 }
 
-/* حاوية العرض بملء الشاشة بالكامل */
+/* حاوية العرض بملء الشاشة الأصلي */
 .book-wrapper {
   width: 100vw;
   height: 100vh;
@@ -42,13 +42,12 @@ html, body {
   height: 100%;
 }
 
-/* تصميم الصفحات الورقية بنعومة وثبات */
+/* تنسيق الصفحات الأصلي الخالي من أي تداخل */
 .page {
   width: 100%;
   height: 100%;
   background-color: #000;
   overflow: hidden;
-  position: relative;
 }
 
 .page img {
@@ -59,21 +58,21 @@ html, body {
   pointer-events: none;
 }
 
-/* مساحة الرابط الشفاف فوق الكتابة الزرقاء في الصفحة الأولى */
-.page-link-hotspot {
+/* رابط الصفحة الأولى الخارجي (فوق الكتاب مباشرة دون تشويه الصفحات) */
+#coverLink {
   position: absolute;
   bottom: 5%;
   left: 5%;
   width: 90%;
   height: 6%;
-  z-index: 50;
+  z-index: 998;
   display: block;
-  background: rgba(0, 0, 0, 0);
+  background: transparent;
   cursor: pointer;
   -webkit-tap-highlight-color: rgba(0, 123, 255, 0.25);
 }
 
-/* أزرار التقليب الشفافة على طرفي الشاشة */
+/* أزرار التقليب الجانبية الشفافة */
 .corner-btn {
   position: fixed;
   bottom: 14px;
@@ -93,25 +92,21 @@ html, body {
   justify-content: center;
   z-index: 1000;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
-  transition: background 0.2s ease, transform 0.1s ease;
 }
 
 .corner-btn:active {
   background: rgba(255, 255, 255, 0.4);
-  transform: scale(0.92);
 }
 
-/* الزر الأيسر (للتالي) */
 #btnNext {
   left: 12px;
 }
 
-/* الزر الأيمن (للسابق) */
 #btnPrev {
   right: 12px;
 }
 
-/* عداد صفحات شفاف وصغير في الزاوية العلوية */
+/* عداد الصفحات العلوي الصغير */
 .page-badge {
   position: fixed;
   top: 12px;
@@ -130,7 +125,7 @@ html, body {
   pointer-events: none;
 }
 
-/* تلميح التقليب العلوي المؤقت */
+/* تلميح التقليب المؤقت */
 .subtle-hint {
   position: absolute;
   top: 15px;
@@ -159,13 +154,12 @@ html, body {
 <div class="book-wrapper">
   <div class="subtle-hint" id="hint">اسحب للتقليب 👈</div>
 
-  <div id="flipbook">
-    <!-- الصفحة الأولى وبداخلها الرابط القابل للضغط -->
-    <div class="page" data-density="soft">
-      <img src="1.jpg" alt="الصفحة 1">
-      <a href="https://edu-women.aliraqia.edu.iq/f-ch-w/" target="_blank" rel="noopener noreferrer" class="page-link-hotspot" title="فتح الرابط"></a>
-    </div>
+  <!-- رابط تفاعلي مستقل فوق الصفحة الأولى -->
+  <a id="coverLink" href="https://edu-women.aliraqia.edu.iq/f-ch-w/" target="_blank" rel="noopener noreferrer" title="فتح الموقع"></a>
 
+  <!-- صفحات نقية بدون أي وسوم داخلية لضمان نعومة وانطواء الورق الأصلي -->
+  <div id="flipbook">
+    <div class="page" data-density="soft"><img src="1.jpg" alt="الصفحة 1"></div>
     <div class="page" data-density="soft"><img src="2.jpg" alt="الصفحة 2"></div>
     <div class="page" data-density="soft"><img src="3.jpg" alt="الصفحة 3"></div>
     <div class="page" data-density="soft"><img src="4.jpg" alt="الصفحة 4"></div>
@@ -174,10 +168,8 @@ html, body {
   </div>
 </div>
 
-<!-- عداد الصفحات العلوي -->
 <div class="page-badge" id="pageNumber">1 / 6</div>
 
-<!-- أزرار التقليب الشفافة على الطرفين -->
 <button class="corner-btn" id="btnNext" title="التالي">‹</button>
 <button class="corner-btn" id="btnPrev" title="السابق">›</button>
 
@@ -187,8 +179,10 @@ window.addEventListener('DOMContentLoaded', () => {
   const screenH = window.innerHeight;
   const total = 6;
   const bookContainer = document.getElementById('flipbook');
+  const coverLink = document.getElementById('coverLink');
+  const pageNum = document.getElementById('pageNumber');
+  const hint = document.getElementById('hint');
 
-  // استدعاء ملف الصوت
   const flipSound = new Audio('flip.mp3');
   flipSound.volume = 0.6;
   flipSound.preload = 'auto';
@@ -220,23 +214,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
   pageFlip.loadFromHTML(document.querySelectorAll('.page'));
 
-  const pageNum = document.getElementById('pageNumber');
-  const hint = document.getElementById('hint');
-
-  // تشغيل الصوت فور بدء حركة الورقة
   pageFlip.on('changeState', (e) => {
     if (e.data === 'flipping') {
       playSound();
     }
   });
 
-  // تحديث العداد
   pageFlip.on('flip', (e) => {
-    pageNum.innerText = (e.data + 1) + ' / ' + total;
+    const currentPage = e.data; // 0 هو الصفحة الأولى
+    pageNum.innerText = (currentPage + 1) + ' / ' + total;
     if (hint) hint.style.display = 'none';
+
+    // إتاحة الرابط في الصفحة الأولى فقط وإخفاؤه تماماً في باقي الصفحات لمنع أي تداخل
+    if (coverLink) {
+      coverLink.style.display = (currentPage === 0) ? 'block' : 'none';
+    }
   });
 
-  // أزرار الطرفين
   document.getElementById('btnNext').addEventListener('click', () => {
     pageFlip.flipNext();
   });
