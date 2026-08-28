@@ -24,11 +24,11 @@ position: fixed;
 font-family: system-ui, -apple-system, sans-serif;
 }
 
-/* حاوية العرض بملء الشاشة */
+/* حاوية العرض - ترك مسافة 55px في الأسفل لشريط التحكم */
 .book-wrapper {
 width: 100vw;
-height: 100vh;
-height: 100dvh;
+height: calc(100vh - 55px);
+height: calc(100dvh - 55px);
 display: flex;
 justify-content: center;
 align-items: center;
@@ -58,21 +58,21 @@ display: block;
 pointer-events: none;
 }
 
-/* شريط التحكم السفلي الشفاف */
+/* شريط التحكم السفلي في مساحته المخصصة خارج مساحة الصورة */
 .bottom-bar {
-position: absolute;
-bottom: 15px;
+position: fixed;
+bottom: 10px;
 left: 50%;
 transform: translateX(-50%);
 display: flex;
 align-items: center;
 gap: 12px;
-background: rgba(0, 0, 0, 0.35);
+background: rgba(30, 30, 30, 0.85);
 backdrop-filter: blur(8px);
 -webkit-backdrop-filter: blur(8px);
-padding: 5px 14px;
+padding: 5px 16px;
 border-radius: 20px;
-border: 1px solid rgba(255, 255, 255, 0.2);
+border: 1px solid rgba(255, 255, 255, 0.25);
 z-index: 1000;
 }
 
@@ -104,7 +104,7 @@ direction: ltr;
 /* تلميح علوي مؤقت */
 .subtle-hint {
 position: absolute;
-top: 20px;
+top: 15px;
 left: 50%;
 transform: translateX(-50%);
 background: rgba(0, 0, 0, 0.6);
@@ -130,14 +130,6 @@ animation: fadeOut 3.5s forwards ease-in-out;
 <div class="book-wrapper">
 <div class="subtle-hint" id="hint">اسحب للتقليب 👈</div>
 
-<!-- شريط تحكم شفاف أسفل الصورة -->
-<div class="bottom-bar">
-<button class="nav-arrow" id="btnNext" title="التالي">‹</button>
-<span class="page-status" id="pageNumber">1 / 6</span>
-<button class="nav-arrow" id="btnPrev" title="السابق">›</button>
-</div>
-
-<!-- الصفحات الورقية -->
 <div id="flipbook">
 <div class="page" data-density="soft"><img src="1.jpg" alt="الصفحة 1"></div>
 <div class="page" data-density="soft"><img src="2.jpg" alt="الصفحة 2"></div>
@@ -148,14 +140,20 @@ animation: fadeOut 3.5s forwards ease-in-out;
 </div>
 </div>
 
+<!-- شريط تحكم ثابت في أسفل الشاشة -->
+<div class="bottom-bar">
+<button class="nav-arrow" id="btnNext" title="التالي">‹</button>
+<span class="page-status" id="pageNumber">1 / 6</span>
+<button class="nav-arrow" id="btnPrev" title="السابق">›</button>
+</div>
+
 <script>
 window.addEventListener('DOMContentLoaded', () => {
 const screenW = window.innerWidth;
-const screenH = window.innerHeight;
+const screenH = window.innerHeight - 55; // حجز مساحة الشريط السفلي بدقة
 const total = 6;
 const bookContainer = document.getElementById('flipbook');
 
-// استدعاء ملف الصوت الجديد
 const flipSound = new Audio('flip.mp3');
 flipSound.volume = 0.6;
 flipSound.preload = 'auto';
@@ -190,31 +188,18 @@ pageFlip.loadFromHTML(document.querySelectorAll('.page'));
 const pageNum = document.getElementById('pageNumber');
 const hint = document.getElementById('hint');
 
-// تشغيل الصوت فور بدء حركة الورقة
 pageFlip.on('changeState', (e) => {
-    if (e.data === 'flipping') {
-        playSound();
-    }
+    if (e.data === 'flipping') playSound();
 });
 
-// تحديث العداد
 pageFlip.on('flip', (e) => {
     pageNum.innerText = (e.data + 1) + ' / ' + total;
     if (hint) hint.style.display = 'none';
 });
 
-// أزرار الشريط
-document.getElementById('btnNext').addEventListener('click', () => {
-    pageFlip.flipNext();
-});
-
-document.getElementById('btnPrev').addEventListener('click', () => {
-    pageFlip.flipPrev();
-});
-
-window.addEventListener('resize', () => {
-    pageFlip.updateFromHtml(document.querySelectorAll('.page'));
-});
+document.getElementById('btnNext').addEventListener('click', () => pageFlip.flipNext());
+document.getElementById('btnPrev').addEventListener('click', () => pageFlip.flipPrev());
+window.addEventListener('resize', () => pageFlip.updateFromHtml(document.querySelectorAll('.page')));
 });
 </script>
 </body>
