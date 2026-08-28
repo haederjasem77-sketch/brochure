@@ -8,213 +8,246 @@
 <script src="https://cdn.jsdelivr.net/npm/page-flip@2.0.7/dist/js/page-flip.browser.js"></script>
 <style>
 * {
-box-sizing: border-box;
-margin: 0;
-padding: 0;
-user-select: none;
--webkit-user-select: none;
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  user-select: none;
+  -webkit-user-select: none;
 }
 
 html, body {
-width: 100%;
-height: 100%;
-overflow: hidden;
-background-color: #000;
-position: fixed;
-font-family: system-ui, -apple-system, sans-serif;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background-color: #000;
+  position: fixed;
+  font-family: system-ui, -apple-system, sans-serif;
 }
 
-/* حاوية العرض بملء الشاشة */
+/* حاوية العرض بملء الشاشة بالكامل */
 .book-wrapper {
-width: 100vw;
-height: 100vh;
-height: 100dvh;
-display: flex;
-justify-content: center;
-align-items: center;
-position: relative;
-background: #000;
-overflow: hidden;
+  width: 100vw;
+  height: 100vh;
+  height: 100dvh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  background: #000;
+  overflow: hidden;
 }
 
 #flipbook {
-width: 100%;
-height: 100%;
+  width: 100%;
+  height: 100%;
 }
 
-/* تصميم الصفحات الورقية */
+/* تصميم الصفحات الورقية بنعومة وثبات */
 .page {
-width: 100%;
-height: 100%;
-background-color: #000;
-overflow: hidden;
+  width: 100%;
+  height: 100%;
+  background-color: #000;
+  overflow: hidden;
+  position: relative;
 }
 
 .page img {
-width: 100%;
-height: 100%;
-object-fit: fill;
-display: block;
-pointer-events: none;
+  width: 100%;
+  height: 100%;
+  object-fit: fill;
+  display: block;
+  pointer-events: none;
 }
 
-/* شريط التحكم السفلي الشفاف */
-.bottom-bar {
-position: absolute;
-bottom: 15px;
-left: 50%;
-transform: translateX(-50%);
-display: flex;
-align-items: center;
-gap: 12px;
-background: rgba(0, 0, 0, 0.35);
-backdrop-filter: blur(8px);
--webkit-backdrop-filter: blur(8px);
-padding: 5px 14px;
-border-radius: 20px;
-border: 1px solid rgba(255, 255, 255, 0.2);
-z-index: 1000;
+/* مساحة الرابط الشفاف فوق الكتابة الزرقاء في الصفحة الأولى */
+.page-link-hotspot {
+  position: absolute;
+  bottom: 5%;
+  left: 5%;
+  width: 90%;
+  height: 6%;
+  z-index: 50;
+  display: block;
+  background: rgba(0, 0, 0, 0);
+  cursor: pointer;
+  -webkit-tap-highlight-color: rgba(0, 123, 255, 0.25);
 }
 
-.nav-arrow {
-background: rgba(255, 255, 255, 0.2);
-border: none;
-color: #fff;
-width: 28px;
-height: 28px;
-border-radius: 50%;
-font-size: 14px;
-cursor: pointer;
-display: flex;
-align-items: center;
-justify-content: center;
+/* أزرار التقليب الشفافة على طرفي الشاشة */
+.corner-btn {
+  position: fixed;
+  bottom: 14px;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.35);
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  color: #ffffff;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+  transition: background 0.2s ease, transform 0.1s ease;
 }
 
-.nav-arrow:active {
-background: rgba(255, 255, 255, 0.5);
+.corner-btn:active {
+  background: rgba(255, 255, 255, 0.4);
+  transform: scale(0.92);
 }
 
-.page-status {
-color: #ffffff;
-font-size: 13px;
-font-weight: bold;
-direction: ltr;
+/* الزر الأيسر (للتالي) */
+#btnNext {
+  left: 12px;
 }
 
-/* تلميح علوي مؤقت */
+/* الزر الأيمن (للسابق) */
+#btnPrev {
+  right: 12px;
+}
+
+/* عداد صفحات شفاف وصغير في الزاوية العلوية */
+.page-badge {
+  position: fixed;
+  top: 12px;
+  left: 12px;
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #ffffff;
+  font-size: 11px;
+  font-weight: bold;
+  padding: 3px 8px;
+  border-radius: 12px;
+  direction: ltr;
+  z-index: 1000;
+  pointer-events: none;
+}
+
+/* تلميح التقليب العلوي المؤقت */
 .subtle-hint {
-position: absolute;
-top: 20px;
-left: 50%;
-transform: translateX(-50%);
-background: rgba(0, 0, 0, 0.6);
-color: #fff;
-font-size: 12px;
-padding: 4px 12px;
-border-radius: 12px;
-pointer-events: none;
-z-index: 999;
-animation: fadeOut 3.5s forwards ease-in-out;
+  position: absolute;
+  top: 15px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.6);
+  color: #fff;
+  font-size: 12px;
+  padding: 4px 12px;
+  border-radius: 12px;
+  pointer-events: none;
+  z-index: 999;
+  animation: fadeOut 3.5s forwards ease-in-out;
 }
 
 @keyframes fadeOut {
-0% { opacity: 0; }
-20% { opacity: 1; }
-80% { opacity: 1; }
-100% { opacity: 0; visibility: hidden; }
+  0% { opacity: 0; }
+  20% { opacity: 1; }
+  80% { opacity: 1; }
+  100% { opacity: 0; visibility: hidden; }
 }
 </style>
 </head>
 <body>
 
 <div class="book-wrapper">
-<div class="subtle-hint" id="hint">اسحب للتقليب 👈</div>
+  <div class="subtle-hint" id="hint">اسحب للتقليب 👈</div>
 
-<!-- شريط تحكم شفاف أسفل الصورة -->
-<div class="bottom-bar">
-<button class="nav-arrow" id="btnNext" title="التالي">‹</button>
-<span class="page-status" id="pageNumber">1 / 6</span>
-<button class="nav-arrow" id="btnPrev" title="السابق">›</button>
+  <div id="flipbook">
+    <!-- الصفحة الأولى وبداخلها الرابط القابل للضغط -->
+    <div class="page" data-density="soft">
+      <img src="1.jpg" alt="الصفحة 1">
+      <a href="https://edu-women.aliraqia.edu.iq/f-ch-w/" target="_blank" rel="noopener noreferrer" class="page-link-hotspot" title="فتح الرابط"></a>
+    </div>
+
+    <div class="page" data-density="soft"><img src="2.jpg" alt="الصفحة 2"></div>
+    <div class="page" data-density="soft"><img src="3.jpg" alt="الصفحة 3"></div>
+    <div class="page" data-density="soft"><img src="4.jpg" alt="الصفحة 4"></div>
+    <div class="page" data-density="soft"><img src="5.jpg" alt="الصفحة 5"></div>
+    <div class="page" data-density="soft"><img src="6.jpg" alt="الصفحة 6"></div>
+  </div>
 </div>
 
-<!-- الصفحات الورقية -->
-<div id="flipbook">
-<div class="page" data-density="soft"><img src="1.jpg" alt="الصفحة 1"></div>
-<div class="page" data-density="soft"><img src="2.jpg" alt="الصفحة 2"></div>
-<div class="page" data-density="soft"><img src="3.jpg" alt="الصفحة 3"></div>
-<div class="page" data-density="soft"><img src="4.jpg" alt="الصفحة 4"></div>
-<div class="page" data-density="soft"><img src="5.jpg" alt="الصفحة 5"></div>
-<div class="page" data-density="soft"><img src="6.jpg" alt="الصفحة 6"></div>
-</div>
-</div>
+<!-- عداد الصفحات العلوي -->
+<div class="page-badge" id="pageNumber">1 / 6</div>
+
+<!-- أزرار التقليب الشفافة على الطرفين -->
+<button class="corner-btn" id="btnNext" title="التالي">‹</button>
+<button class="corner-btn" id="btnPrev" title="السابق">›</button>
 
 <script>
 window.addEventListener('DOMContentLoaded', () => {
-const screenW = window.innerWidth;
-const screenH = window.innerHeight;
-const total = 6;
-const bookContainer = document.getElementById('flipbook');
+  const screenW = window.innerWidth;
+  const screenH = window.innerHeight;
+  const total = 6;
+  const bookContainer = document.getElementById('flipbook');
 
-// استدعاء ملف الصوت الجديد
-const flipSound = new Audio('flip.mp3');
-flipSound.volume = 0.6;
-flipSound.preload = 'auto';
+  // استدعاء ملف الصوت
+  const flipSound = new Audio('flip.mp3');
+  flipSound.volume = 0.6;
+  flipSound.preload = 'auto';
 
-function playSound() {
+  function playSound() {
     try {
-        flipSound.currentTime = 0;
-        flipSound.play().catch(() => {});
+      flipSound.currentTime = 0;
+      flipSound.play().catch(() => {});
     } catch (err) {}
-}
+  }
 
-const pageFlip = new St.PageFlip(bookContainer, {
-width: screenW,
-height: screenH,
-size: "stretch",
-minWidth: 200,
-maxWidth: 1600,
-minHeight: 300,
-maxHeight: 2500,
-maxShadowOpacity: 0.5,
-showCover: false,
-usePortrait: true,
-mobileScrollSupport: false,
-flippingTime: 700,
-useMouseEvents: true,
-swipeDistance: 25,
-direction: 'rtl'
-});
+  const pageFlip = new St.PageFlip(bookContainer, {
+    width: screenW,
+    height: screenH,
+    size: "stretch",
+    minWidth: 200,
+    maxWidth: 1600,
+    minHeight: 300,
+    maxHeight: 2500,
+    maxShadowOpacity: 0.5,
+    showCover: false,
+    usePortrait: true,
+    mobileScrollSupport: false,
+    flippingTime: 700,
+    useMouseEvents: true,
+    swipeDistance: 25,
+    direction: 'rtl'
+  });
 
-pageFlip.loadFromHTML(document.querySelectorAll('.page'));
+  pageFlip.loadFromHTML(document.querySelectorAll('.page'));
 
-const pageNum = document.getElementById('pageNumber');
-const hint = document.getElementById('hint');
+  const pageNum = document.getElementById('pageNumber');
+  const hint = document.getElementById('hint');
 
-// تشغيل الصوت فور بدء حركة الورقة
-pageFlip.on('changeState', (e) => {
+  // تشغيل الصوت فور بدء حركة الورقة
+  pageFlip.on('changeState', (e) => {
     if (e.data === 'flipping') {
-        playSound();
+      playSound();
     }
-});
+  });
 
-// تحديث العداد
-pageFlip.on('flip', (e) => {
+  // تحديث العداد
+  pageFlip.on('flip', (e) => {
     pageNum.innerText = (e.data + 1) + ' / ' + total;
     if (hint) hint.style.display = 'none';
-});
+  });
 
-// أزرار الشريط
-document.getElementById('btnNext').addEventListener('click', () => {
+  // أزرار الطرفين
+  document.getElementById('btnNext').addEventListener('click', () => {
     pageFlip.flipNext();
-});
+  });
 
-document.getElementById('btnPrev').addEventListener('click', () => {
+  document.getElementById('btnPrev').addEventListener('click', () => {
     pageFlip.flipPrev();
-});
+  });
 
-window.addEventListener('resize', () => {
+  window.addEventListener('resize', () => {
     pageFlip.updateFromHtml(document.querySelectorAll('.page'));
-});
+  });
 });
 </script>
 </body>
